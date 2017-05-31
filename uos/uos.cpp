@@ -57,6 +57,8 @@ bool uos::prepare_shader_prog() {
 	loc_light_pos = sp.get_uniform_loc("light_position_world");
 	loc_light_col = sp.get_uniform_loc("light_color");
 	loc_light_power = sp.get_uniform_loc("light_power");
+	loc_ambient_light_power = sp.get_uniform_loc("ambient_light_power");
+	loc_specular_color = sp.get_uniform_loc("specular_color");
 
 	loc_tex = sp.get_uniform_loc("tsampler");
 	loc_btex = sp.get_uniform_loc("btexture");
@@ -65,19 +67,15 @@ bool uos::prepare_shader_prog() {
 }
 
 void uos::draw() {
-	//init_cube_face();
 	draw_cube_face();
-	//destroy_cube_face();
-
-	//init_cube_wire();
-	//draw_cube_wire();
-	//destroy_cube_wire();
 }
 
 void uos::init_light() {
 	glUniform3f(loc_light_pos, light_pos[0], light_pos[1], light_pos[2]);
-	glUniform4f(loc_light_col, light_col[0], light_col[1], light_col[2], light_col[3]);
+	glUniform3f(loc_light_col, light_col[0], light_col[1], light_col[2]);
 	glUniform1f(loc_light_power, light_power);
+	glUniform3f(loc_ambient_light_power, ambient_light_power_r, ambient_light_power_g, ambient_light_power_b);
+	glUniform3f(loc_specular_color, specular_r, specular_g, specular_b);
 }
 
 void uos::init_cube_face() {
@@ -196,8 +194,8 @@ void uos::init_cube_face() {
 	<< ", " << cube_face.get_tri_normals()[i].data[2] << endl;
 	}*/
 
+	//cube_face.calc_normals_origin();
 	cube_face.calc_normals();
-
 	for (int i = 0; i < cube_face.get_num_vertexes(); ++i) {
 		cout << cube_face.get_normals()[i].data[0] << ", " << cube_face.get_normals()[i].data[1]
 			<< ", " << cube_face.get_normals()[i].data[2] << endl;
@@ -213,138 +211,6 @@ void uos::init_cube_face() {
 	glVertexAttribPointer(loc_nml, 3, GL_FLOAT, GL_FALSE, sizeof(vector3f), 0);
 	cube_face.destroy();
 }
-
-//void uos::init_cube_face() {
-//	cube_face.malloc(36, 12);
-//	//face0
-//	cube_face.set_pos(0, 1.f, 1.f, 1.f);//0
-//	cube_face.set_pos(1, 1.f, 1.f, -1.f);//1
-//	cube_face.set_pos(2, -1.f, 1.f, -1.f);//2
-//
-//	cube_face.set_pos(3, -1.f, 1.f, -1.f);//2
-//	cube_face.set_pos(4, -1.f, 1.f, 1.f);//3
-//	cube_face.set_pos(5, 1.f, 1.f, 1.f);//0
-//
-//	//face1
-//	cube_face.set_pos(6, 1.f, -1.f, 1.f);//4
-//	cube_face.set_pos(7, -1.f, -1.f, 1.f);//7
-//	cube_face.set_pos(8, -1.f, -1.f, -1.f);//6
-//
-//	cube_face.set_pos(9, -1.f, -1.f, -1.f);//6
-//	cube_face.set_pos(10, 1.f, -1.f, -1.f);//5
-//	cube_face.set_pos(11, 1.f, -1.f, 1.f);//4
-//
-//	//face2
-//	cube_face.set_pos(12, 1.f, 1.f, 1.f);//0
-//	cube_face.set_pos(13, 1.f, -1.f, 1.f);//4
-//	cube_face.set_pos(14, 1.f, -1.f, -1.f);//5
-//
-//	cube_face.set_pos(15, 1.f, -1.f, -1.f);//5
-//	cube_face.set_pos(16, 1.f, 1.f, -1.f);//1
-//	cube_face.set_pos(17, 1.f, 1.f, 1.f);//0
-//
-//	//face3
-//	cube_face.set_pos(18, 1.f, 1.f, -1.f);//1
-//	cube_face.set_pos(19, 1.f, -1.f, -1.f);//5
-//	cube_face.set_pos(20, -1.f, -1.f, -1.f);//6
-//
-//	cube_face.set_pos(21, -1.f, -1.f, -1.f);//6
-//	cube_face.set_pos(22, -1.f, 1.f, -1.f);//2
-//	cube_face.set_pos(23, 1.f, 1.f, -1.f);//1
-//
-//	//face4
-//	cube_face.set_pos(24, -1.f, 1.f, -1.f);//2
-//	cube_face.set_pos(25, -1.f, -1.f, -1.f);//6
-//	cube_face.set_pos(26, -1.f, -1.f, 1.f);//7
-//
-//	cube_face.set_pos(27, -1.f, -1.f, 1.f);//7
-//	cube_face.set_pos(28, -1.f, 1.f, 1.f);//3
-//	cube_face.set_pos(29, -1.f, 1.f, -1.f);//2
-//
-//	//face5
-//	cube_face.set_pos(30, -1.f, -1.f, 1.f);//7
-//	cube_face.set_pos(31, 1.f, -1.f, 1.f);//4
-//	cube_face.set_pos(32, 1.f, 1.f, 1.f);//0
-//
-//	cube_face.set_pos(33, 1.f, 1.f, 1.f);//0
-//	cube_face.set_pos(34, -1.f, 1.f, 1.f);//3
-//	cube_face.set_pos(35, -1.f, -1.f, 1.f);//7
-//
-//	glGenBuffers(1, &cube_face.vbuf);
-//	glBindBuffer(GL_ARRAY_BUFFER, cube_face.vbuf);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(vector3f) * cube_face.get_num_vertexes(),
-//		cube_face.get_positions(), GL_STATIC_DRAW);
-//
-//	glEnableVertexAttribArray(loc_pos);
-//	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, sizeof(vector3f), 0);
-//
-//	for (int i = 0; i < 6; ++i) {
-//		cube_face.set_color(i, 1.f, 0.f, 0.f, 1.f);
-//	}
-//
-//	for (int i = 6; i < 12; ++i) {
-//		cube_face.set_color(i, 0.f, 1.f, 0.f, 1.f);
-//	}
-//
-//	for (int i = 12; i < 18; ++i) {
-//		cube_face.set_color(i, 0.f, 0.f, 1.f, 1.f);
-//	}
-//
-//	for (int i = 18; i < 24; ++i) {
-//		cube_face.set_color(i, 1.f, 1.f, 0.f, 1.f);
-//	}
-//
-//	for (int i = 24; i < 30; ++i) {
-//		cube_face.set_color(i, 1.f, 0.f, 1.f, 1.f);
-//	}
-//
-//	for (int i = 30; i < 36; ++i) {
-//		cube_face.set_color(i, 0.f, 1.f, 1.f, 1.f);
-//	}
-//
-//	glGenBuffers(1, &cube_face.cbuf);
-//	glBindBuffer(GL_ARRAY_BUFFER, cube_face.cbuf);
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(vector4f) * cube_face.get_num_vertexes(),
-//		cube_face.get_colors(), GL_STATIC_DRAW);
-//
-//	glEnableVertexAttribArray(loc_col);
-//	glVertexAttribPointer(loc_col, 4, GL_FLOAT, GL_FALSE, sizeof(vector4f), 0);
-//
-//	for (int i = 0; i < cube_face.get_num_prims(); ++i) {
-//		int j = 3 * i;
-//		cube_face.set_triangle(i, j, j+1, j+2);
-//		//cube_face.set_triangle(i, j++, j++, j++);
-//	}
-//
-//	glGenBuffers(1, &cube_face.ibuf);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_face.ibuf);
-//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vector3ui) * cube_face.get_num_prims(), 
-//		cube_face.get_indexes(), GL_STATIC_DRAW);
-//
-//	cube_face.calc_tri_normals();
-//
-//	/*for (int i = 0; i < cube_face.get_num_prims(); ++i) {
-//		cout << cube_face.get_tri_normals()[i].data[0] << ", " << cube_face.get_tri_normals()[i].data[1]
-//			<< ", " << cube_face.get_tri_normals()[i].data[2] << endl;
-//	}*/
-//
-//	cube_face.calc_normals();
-//
-//	for (int i = 0; i < cube_face.get_num_vertexes(); ++i) {
-//		cout << cube_face.get_normals()[i].data[0] << ", " << cube_face.get_normals()[i].data[1]
-//			<< ", " << cube_face.get_normals()[i].data[2] << endl;
-//	}
-//
-//	glGenBuffers(1, &cube_face.nbuf);
-//	glBindBuffer(GL_ARRAY_BUFFER, cube_face.nbuf);
-//
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(vector3f) * cube_face.get_num_vertexes(),
-//		cube_face.get_normals(), GL_STATIC_DRAW);
-//
-//	glEnableVertexAttribArray(loc_nml);
-//	glVertexAttribPointer(loc_nml, 3, GL_FLOAT, GL_FALSE, sizeof(vector3f), 0);
-//	cube_face.destroy();
-//}
 
 void uos::init_cube_wire() {
 	cube_wire.malloc(8, 12);
@@ -473,11 +339,22 @@ void uos::set_light_position(const Vector3f &light_pos) {
 	this->light_pos = light_pos;
 }
 
-void uos::set_light_color(const Vector4f &light_col) {
+void uos::set_light_color(const Vector3f &light_col) {
 	this->light_col = light_col;
+}
+
+void uos::set_ambient_light_power(const float r, const float g, const float b) {
+	ambient_light_power_r = r;
+	ambient_light_power_g = g;
+	ambient_light_power_b = b;
 }
 
 void uos::set_light_power(const float light_power) {
 	this->light_power = light_power;
 }
 
+void uos::set_specular_color(const float r, const float g, const float b) {
+	specular_r = r;
+	specular_g = g;
+	specular_b = b;
+}

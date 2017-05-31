@@ -125,6 +125,13 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 		0.f, 0.f, 0.f, 1.f;
 }
 
+void vertexes::calc_normals_origin() {
+	int sz = sizeof(float) * 3;
+	for (int i = 0; i < num_vertexes; ++i) {
+		memcpy((void*)normals[i].data, (void*)poss[i].data, sz);
+	}
+}
+
 void tri_vertexes::calc_tri_normals() {
 	for (int i = 0; i < num_prims; ++i) {
 		cross(poss[indexes[i].data[1]].data[0] - poss[indexes[i].data[0]].data[0],

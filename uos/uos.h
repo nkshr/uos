@@ -21,13 +21,18 @@ private:
 	GLuint loc_light_pos;
 	GLuint loc_light_col;
 	GLuint loc_light_power;
+	GLuint loc_ambient_light_power;
+	GLuint loc_specular_color;
 	GLuint loc_tex;
 	GLuint loc_btex;	
 
 	Vector3f light_pos;
-	Vector4f light_col;
+	Vector3f light_col;
+	Vector3f ambient_light_col;
 
 	float light_power;
+	float ambient_light_power_r, ambient_light_power_g, ambient_light_power_b;
+	float specular_r, specular_g, specular_b;
 
 	tri_vertexes cube_face;
 	line_vertexes cube_wire;
@@ -64,6 +69,8 @@ public:
 	void set_view(const Matrix4f &v);
 	void set_cube_model(const Matrix4f &m);
 	void set_light_position(const  Vector3f &light_pos);
-	void set_light_color(const Vector4f &light_col);
+	void set_light_color(const Vector3f &light_col);
 	void set_light_power(const float light_power);
+	void set_ambient_light_power(const float r, const float g, const float b);
+	void set_specular_color(const float r, const float g, const float b);
 };

@@ -1,3 +1,5 @@
+#include <Windows.h>
+
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -10,7 +12,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <Windows.h>
 
 using namespace std;
 using namespace Eigen;
@@ -53,31 +54,31 @@ int main(int argc, char ** argv) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	//glDisable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_FRONT);
 
 	uos simulator;
 	Matrix4f proj;
 	get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
 	simulator.set_proj(proj);
 	cout << "proj : " << proj << endl;
-	//Matrix4f view;
-	//get_Sim3(1.f, deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 0.f, -700, view);
-	//simulator.set_view(view);
 
 	Vector3f light_pos;
-	light_pos << 0.f, 0.f, 500.f;
+	light_pos << 0.f, 500.f, 500.f;
 	simulator.set_light_position(light_pos);
 
-	Vector4f light_col;
-	light_col << 1.f, 1.f, 1.f, 1.f;
+	Vector3f light_col;
+	light_col << 1.f, 1.f, 1.f;
 	simulator.set_light_color(light_col);
 
-	simulator.set_light_power(100000);
+	//simulator.set_ambient_light_power(0.1f, 0.1f, 0.1f);
+	//simulator.set_ambient_light_power(1.f, 1.f, 1.f);
+	//simulator.set_ambient_light_power(0.f, 0.f, 0.f);
+	simulator.set_specular_color(0.3f, 0.3f, 0.3f);
+	//simulator.set_specular_color(1.f, 1.f, 1.f);
+	simulator.set_light_power(200000);
 
 	Mat texture = imread(texture_name);
-	//texture = Mat( 10, 10, CV_8UC3, Scalar(100, 0, 0));
 	if (texture.empty()) {
 		cerr << "Error : Couldn't read " << texture_name << "." << endl;
 		return false;
@@ -95,10 +96,8 @@ int main(int argc, char ** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
-		//cout << "ang : " << ang << endl;
 		Matrix4f view;
-		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 1500, view);
-		//get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, -700, view);
+		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 3000, view);
 		simulator.set_view(view);
 
 		Matrix4f cube_model;

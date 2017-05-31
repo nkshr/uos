@@ -1,20 +1,4 @@
 #pragma once
-//struct vertex {
-//	float x, y, z;
-//	float r, g, b, alpha;
-//
-//	vertex(const float x, const float y, const float z,
-//		const float r, const float g, const float b, const float alpha) :x(x), y(y),
-//		z(z), r(r), g(g), b(b), alpha(alpha) {
-//	}
-//};
-//
-//struct tvertex {
-//	float x, y, z;
-//	float r, g, b, alpha;
-//	float s, t;
-//};
-
 class shader_prog {
 public:
 	shader_prog();
@@ -34,5 +18,4 @@ private:
 	GLuint fs;
 	GLuint program;
 };
-
 void check_gl_error(const char *file, int line);

@@ -2,16 +2,18 @@
 layout(triangles, invocations = 1) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-in vec4 vertex_color[];
+in vec3 vertex_color[];
 in vec3 vertex_normal_camera[];
 in vec3 vertex_light_dir_camera[];
 in vec3 vertex_position_world[];
+in vec3 vertex_eye_dir_camera[];
 in vec2 vertex_st[];
 
-out vec4 geo_color;
+out vec3 geo_color;
 out vec3 geo_normal_camera;
 out vec3 geo_light_dir_camera;
 out vec3 geo_position_world;
+out vec3 geo_eye_dir_camera;
 out vec2 geo_st;
 
 void main(){
@@ -20,6 +22,7 @@ void main(){
 		geo_normal_camera = vertex_normal_camera[i];
 		geo_light_dir_camera = vertex_light_dir_camera[i];
 		geo_position_world = vertex_position_world[i];
+		geo_eye_dir_camera = vertex_eye_dir_camera[i];
 		geo_st = vertex_st[i];
 		gl_Position = gl_in[i].gl_Position;
 		EmitVertex();

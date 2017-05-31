@@ -55,7 +55,7 @@ public:
 
 	}
 
-	~vertexes() {
+	virtual ~vertexes() {
 
 	}
 
@@ -116,6 +116,8 @@ public:
 		delete cols;
 		delete tposs;
 	}
+
+	void calc_normals_origin();
 };
 
 class tri_vertexes : public vertexes{
