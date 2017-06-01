@@ -6,25 +6,16 @@ private:
 	const char *gsname;
 	const char *fsname;
 
-	shader_prog sp;
+	shader_prog cube_sprog;
+	shader_prog light_sprog;
 
 	GLuint loc_pos;
 	GLuint loc_col;
 	GLuint loc_st;
 	GLuint loc_nml;
 
-	GLuint loc_model;
-	GLuint loc_view;
-	GLuint loc_proj;
-	GLuint loc_mv;
-	GLuint loc_mvp;
-	GLuint loc_light_pos;
-	GLuint loc_light_col;
-	GLuint loc_light_power;
-	GLuint loc_ambient_light_power;
-	GLuint loc_specular_color;
-	GLuint loc_tex;
-	GLuint loc_btex;	
+	GLuint cube_vao;
+	GLuint light_vao;
 
 	Vector3f light_pos;
 	Vector3f light_col;
@@ -34,25 +25,14 @@ private:
 	float ambient_light_power_r, ambient_light_power_g, ambient_light_power_b;
 	float specular_r, specular_g, specular_b;
 
-	tri_vertexes cube_face;
-	line_vertexes cube_wire;
+	vertices cube_face;
 
 	Matrix4f cube_model;
 	Matrix4f view;
 	Matrix4f proj;
 
-	//GLuint register_vertexs(const int num_vertexs, const uos::vertex *vertexs);
-	//GLuint register_indexes(const int num_indexs, const GLuint *indexes);
-
-	void init_light();
-	void init_cube_face();
-	void init_cube_wire();
-
 	void draw_cube_face();
-	void draw_cube_wire();
-
 	void destroy_cube_face();
-	void destroy_cube_wire();
 
 public:
 	uos();
@@ -65,12 +45,12 @@ public:
 	void draw();
 
 
-	void set_proj(const Matrix4f &p);
-	void set_view(const Matrix4f &v);
-	void set_cube_model(const Matrix4f &m);
-	void set_light_position(const  Vector3f &light_pos);
-	void set_light_color(const Vector3f &light_col);
-	void set_light_power(const float light_power);
-	void set_ambient_light_power(const float r, const float g, const float b);
-	void set_specular_color(const float r, const float g, const float b);
+	void set_proj(const float *proj);
+	void set_view(const float *view);
+	void set_cube_model(const float *model);
+	void set_light_pos(const  float x, const float y, const float z);
+	void set_light_col(const float r, const float g, const float b);
+	void set_light_pwr(const float pwr);
+	void set_amb_light_pwr(const float r, const float g, const float b);
+	void set_spec_col(const float r, const float g, const float b);
 };

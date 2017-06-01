@@ -83,11 +83,7 @@ void shader_prog::destroy() {
 	glDeleteShader(vs);
 	glDeleteShader(fs);
 	glDeleteShader(gs);
-
 	glDeleteShader(program);
-
-	/*delete vssrc;
-	delete fssrc;*/
 }
 
 shader_prog::~shader_prog() {
@@ -98,8 +94,19 @@ int shader_prog::get_attrib_loc(const char *param) {
 	return glGetAttribLocation(program, param);
 }
 
-int shader_prog::get_uniform_loc(const char *param) {
-	return glGetUniformLocation(program, param);
+void shader_prog::set_vec3(const char *param, const float v0, const float v1, const float v2) {
+	GLuint loc =  glGetUniformLocation(program, param);
+	glUniform3f(loc, v0, v1, v2);
+}
+
+void shader_prog::set_val(const char *param, const float val) {
+	GLuint loc = glGetUniformLocation(program, param);
+	glUniform1f(loc, val);
+}
+
+void shader_prog::set_mat4(const char *param, const float *data) {
+	GLuint loc = glGetUniformLocation(program, param);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
 }
 
 void shader_prog::use() {
@@ -168,4 +175,92 @@ void check_gl_error(const char *file, int line) {
 		cerr << "GL_" << error.c_str() << " - " << file << ":" << line << endl;
 		err = glGetError();
 	}
+}
+
+
+void set_vec3(const float v0, const float v1, const float v2, float * _buf) {
+	static float *buf;
+	if (_buf != NULL)
+		buf = _buf;
+
+	*buf = v0;
+	buf++;
+	*buf = v1;
+	buf++;
+	*buf = v2;
+	buf++;
+}
+
+void set_vec4(const float v0, const float v1, const float v2, const float v3, float * _buf) {
+	static float *buf;
+	if (_buf != NULL)
+		buf = _buf;
+
+	*buf = v0;
+	buf++;
+	*buf = v1;
+	buf++;
+	*buf = v2;
+	buf++;
+	*buf = v3;
+	buf++;
+}
+
+
+
+void set_cube_vertices(const float length, float *buf) {
+	const float half_len = length * 0.5f;
+	//face0
+	set_vec3(half_len, half_len, half_len, buf);//0
+	set_vec3(-half_len, half_len, half_len, NULL);//3
+	set_vec3(-half_len, half_len, -half_len, NULL);//2
+
+	set_vec3(-half_len, half_len, -half_len, NULL);//2
+	set_vec3(half_len, half_len, -half_len, NULL);//1
+	set_vec3(half_len, half_len, half_len, NULL);//0
+
+	//face1
+	set_vec3(half_len, -half_len, half_len, NULL);//4
+	set_vec3(half_len, -half_len, -half_len, NULL);//5
+	set_vec3(-half_len, -half_len, -half_len, NULL);//6
+
+	set_vec3(-half_len, -half_len, -half_len, NULL);//6
+	set_vec3(-half_len, -half_len, half_len, NULL);//7
+	set_vec3(half_len, -half_len, half_len, NULL);//4
+
+	//face2
+	set_vec3(half_len, half_len, half_len, NULL);//0
+	set_vec3(half_len, half_len, -half_len, NULL);//1
+	set_vec3(half_len, -half_len, -half_len, NULL);//5
+
+	set_vec3(half_len, -half_len, -half_len, NULL);//5
+	set_vec3(half_len, -half_len, half_len, NULL);//4
+	set_vec3(half_len, half_len, half_len, NULL);//0
+
+	//face3
+	set_vec3(half_len, half_len, -half_len, NULL);//1
+	set_vec3(-half_len, half_len, -half_len, NULL);//2
+	set_vec3(-half_len, -half_len, -half_len, NULL);//6
+
+	set_vec3(-half_len, -half_len, -half_len, NULL);//6
+	set_vec3(half_len, -half_len, -half_len, NULL);//5
+	set_vec3(half_len, half_len, -half_len, NULL);//1
+
+	//face4
+	set_vec3(-half_len, half_len, -half_len, NULL);//2
+	set_vec3(-half_len, half_len, half_len, NULL);//3
+	set_vec3(-half_len, -half_len, half_len, NULL);//7
+
+	set_vec3(-half_len, -half_len, half_len, NULL);//7
+	set_vec3(-half_len, -half_len, -half_len, NULL);//6
+	set_vec3(-half_len, half_len, -half_len, NULL);//2
+
+	//face5
+	set_vec3(-half_len, half_len, half_len, NULL);//3
+	set_vec3(half_len, half_len, half_len, NULL);//0
+	set_vec3(half_len, -half_len, half_len, NULL);//4
+
+	set_vec3(half_len, -half_len, half_len, NULL);//4
+	set_vec3(-half_len, -half_len, half_len, NULL);//7
+	set_vec3(-half_len, half_len, half_len, NULL);//3
 }

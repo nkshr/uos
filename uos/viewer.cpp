@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -60,23 +61,19 @@ int main(int argc, char ** argv) {
 	uos simulator;
 	Matrix4f proj;
 	get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
-	simulator.set_proj(proj);
+	simulator.set_proj(proj.data());
 	cout << "proj : " << proj << endl;
 
-	Vector3f light_pos;
-	light_pos << 0.f, 500.f, 500.f;
-	simulator.set_light_position(light_pos);
-
-	Vector3f light_col;
-	light_col << 1.f, 1.f, 1.f;
-	simulator.set_light_color(light_col);
-
-	//simulator.set_ambient_light_power(0.1f, 0.1f, 0.1f);
-	//simulator.set_ambient_light_power(1.f, 1.f, 1.f);
-	//simulator.set_ambient_light_power(0.f, 0.f, 0.f);
-	simulator.set_specular_color(0.3f, 0.3f, 0.3f);
-	//simulator.set_specular_color(1.f, 1.f, 1.f);
-	simulator.set_light_power(200000);
+	simulator.set_light_pos(0.f, 500.f, 500.f);
+	simulator.set_light_col(1.f, 1.f, 1.f);
+	simulator.set_light_pwr(200000);
+	simulator.set_amb_light_pwr(0.1f, 0.1f, 0.1f);
+	////simulator.set_ambient_light_power(0.1f, 0.1f, 0.1f);
+	////simulator.set_ambient_light_power(1.f, 1.f, 1.f);
+	////simulator.set_ambient_light_power(0.f, 0.f, 0.f);
+	//simulator.set_specular_color(0.3f, 0.3f, 0.3f);
+	////simulator.set_specular_color(1.f, 1.f, 1.f);
+	//simulator.set_light_power(200000);
 
 	Mat texture = imread(texture_name);
 	if (texture.empty()) {
@@ -98,11 +95,11 @@ int main(int argc, char ** argv) {
 
 		Matrix4f view;
 		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 3000, view);
-		simulator.set_view(view);
+		//simulator.set_view(view);
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
-		simulator.set_cube_model(cube_model);
+		//simulator.set_cube_model(cube_model);
 
 		ang += 1.f;
 

@@ -125,46 +125,19 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 		0.f, 0.f, 0.f, 1.f;
 }
 
-void vertexes::calc_normals_origin() {
-	int sz = sizeof(float) * 3;
-	for (int i = 0; i < num_vertexes; ++i) {
-		memcpy((void*)normals[i].data, (void*)poss[i].data, sz);
-	}
-}
-
-void tri_vertexes::calc_tri_normals() {
-	for (int i = 0; i < num_prims; ++i) {
-		cross(poss[indexes[i].data[1]].data[0] - poss[indexes[i].data[0]].data[0],
-			poss[indexes[i].data[1]].data[1] - poss[indexes[i].data[0]].data[1],
-			poss[indexes[i].data[1]].data[2] - poss[indexes[i].data[0]].data[2],
-			poss[indexes[i].data[2]].data[0] - poss[indexes[i].data[0]].data[0],
-			poss[indexes[i].data[2]].data[1] - poss[indexes[i].data[0]].data[1],
-			poss[indexes[i].data[2]].data[2] - poss[indexes[i].data[0]].data[2], 
-			tri_normals[i].data[0], tri_normals[i].data[1], tri_normals[i].data[2]);
-		tri_normals[i].data[0] *= -1.f;
-		tri_normals[i].data[1] *= -1.f;
-		tri_normals[i].data[2] *= -1.f;
-	}
-}
-
-void tri_vertexes::calc_normals() {
-	for (int i = 0; i < num_vertexes; ++i) {
-		normals[i].data[0] = normals[i].data[1] = normals[i].data[2] = 0.f;
-		int count = 0;
-		for (int j = 0; j < num_prims; ++j) {
-			if (i == indexes[j].data[0] || i == indexes[j].data[1] 
-				|| i == indexes[j].data[2]) {
-				++count;
-				normals[i].data[0] += tri_normals[j].data[0];
-				normals[i].data[1] += tri_normals[j].data[1];
-				normals[i].data[2] += tri_normals[j].data[2];
-			}
-		}
-
-		//cout << normals[i].data[0] << ", " << normals[i].data[1] << ", " << normals[i].data[2] << endl;
-		float icount = 1.f / static_cast<float>(count);
-		normals[i].data[0] *= icount;
-		normals[i].data[1] *= icount;
-		normals[i].data[2] *= icount;
-	}
+void calc_prim_normals(vertices vtxs) {
+	for (int i = 0; i < vtxs.num_prims; ++i) {
+		int *indices = &vtxs.indices[i * 3];
+		const int ipos0 = indices[0] * 3;
+		float *pos0 = &vtxs.poss[ipos0];
+		const int ipos1 = indices[1] * 3;
+		float *pos1 = &vtxs.poss[ipos1];
+		const int ipos2 = indices[2] * 3;
+		float *pos2 = &vtxs.poss[ipos2];
+	
+		cross(pos2[0] - pos0[0], pos2[1] - pos0[1], pos2[2] - pos0[2], 
+			pos1[0] - pos0[0], pos1[1] - pos0[1], pos1[2] - pos0[2],
+			vtxs.prim_normals[ipos0], vtxs.prim_normals[ipos1], vtxs.prim_normals[ipos2]);
+		normalize(vtxs.prim_normals[ipos0], vtxs.prim_normals[ipos1], vtxs.prim_normals[ipos2]);
+	}	
 }
