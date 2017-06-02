@@ -55,14 +55,10 @@ int main(int argc, char ** argv) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	uos simulator;
-	Matrix4f proj;
-	get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
-	simulator.set_proj(proj.data());
-	cout << "proj : " << proj << endl;
 
 	simulator.set_light_pos(0.f, 500.f, 500.f);
 	simulator.set_light_col(1.f, 1.f, 1.f);
@@ -85,6 +81,11 @@ int main(int argc, char ** argv) {
 	if (!simulator.init())
 		return false;
 
+	Matrix4f proj;
+	get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
+	simulator.set_proj(proj.data());
+	cout << "proj : " << proj << endl;
+
 	float ang = 0.f;
 	while (!glfwWindowShouldClose(window)) {
 		int frame_width, frame_height;
@@ -95,11 +96,11 @@ int main(int argc, char ** argv) {
 
 		Matrix4f view;
 		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 3000, view);
-		//simulator.set_view(view);
+		simulator.set_view(view.data());
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
-		//simulator.set_cube_model(cube_model);
+		simulator.set_cube_model(cube_model.data());
 
 		ang += 1.f;
 

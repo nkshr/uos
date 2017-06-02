@@ -20,7 +20,7 @@ struct vertices{
 	float *normals;
 	float *prim_normals;
 	float *cols;
-	int *indices;
+	uint *indices;
 	int num_vertices;
 	int num_prims;
 

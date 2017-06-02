@@ -22,13 +22,8 @@ using namespace cv;
 #define CUBE_LEN 600
 
 uos::uos() {
-	vsname = "uos.vs";
-	gsname = "uos.gs";
-	fsname = "uos.fs";
-
-	cube_model = Matrix4f::Identity();
-	view = Matrix4f::Identity();
-	proj = Matrix4f::Identity();
+	cube_vsname = "cube.vs";
+	cube_fsname = "cube.fs";
 }
 
 uos::~uos() {
@@ -36,21 +31,19 @@ uos::~uos() {
 }
 
 bool uos::prepare_shader_prog() {
-	if (!cube_sprog.create_shader(vsname, GL_VERTEX_SHADER))
+	if (!cube_sprog.create_shader(cube_vsname, GL_VERTEX_SHADER))
 		return false;
-	if (!cube_sprog.create_shader(gsname, GL_GEOMETRY_SHADER))
-		return false;
-	if (!cube_sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
+	if (!cube_sprog.create_shader(cube_fsname, GL_FRAGMENT_SHADER))
 		return false;
 
 	if (!cube_sprog.create_prog())
 		return false;
 
-	loc_pos = cube_sprog.get_attrib_loc("position_model");
-	loc_col = cube_sprog.get_attrib_loc("color");
+	loc_pos = cube_sprog.get_attrib_loc("pos_model");
+	loc_col = cube_sprog.get_attrib_loc("col");
 	loc_st = cube_sprog.get_attrib_loc("st");
 	loc_nml = cube_sprog.get_attrib_loc("normal_model");
-
+	cube_sprog.bind();
 	cube_sprog.use();
 	return true;
 }
@@ -61,7 +54,8 @@ void uos::draw() {
 
 
 void uos::draw_cube_face() {
-	glBindVertexArray(cube_vao);
+	cube_sprog.bind();
+	//cube_sprog.use();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
@@ -79,13 +73,27 @@ bool uos::init() {
 	cube_face.poss = new float[cube_face.num_vertices * 3];
 	set_cube_vertices(CUBE_LEN, cube_face.poss);
 
+	//for (int i = 0; i < cube_face.num_vertices*3; i+=3) {
+	//	cout << cube_face.poss[i] << ", " << cube_face.poss[i + 1] << ", " << cube_face.poss[i + 2] << endl;
+	//}
+
 	glGenBuffers(1, &cube_face.vbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_face.vbuf_id);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * cube_face.num_vertices,
 		cube_face.poss, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(loc_pos);
-	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	cube_face.indices = new uint[cube_face.num_vertices];
+	for (int i = 0; i < cube_face.num_vertices; ++i) {
+		cube_face.indices[i] = i;
+	}
+
+	glGenBuffers(1, &cube_face.ibuf_id);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_face.ibuf_id);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * cube_face.num_vertices,
+		cube_face.indices, GL_STATIC_DRAW);
 
 	cube_face.cols = new float[cube_face.num_vertices * 4];
 	set_vec4(1.f, 0.f, 0.f, 1.f, cube_face.cols);
@@ -119,17 +127,7 @@ bool uos::init() {
 		cube_face.cols, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(loc_col);
-	glVertexAttribPointer(loc_col, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
-
-	cube_face.indices = new int[cube_face.num_vertices];
-	for (int i = 0; i < cube_face.num_vertices; ++i) {
-		cube_face.indices[i] = i;
-	}
-
-	glGenBuffers(1, &cube_face.ibuf_id);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_face.ibuf_id);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * cube_face.num_vertices,
-		cube_face.indices, GL_STATIC_DRAW);
+	glVertexAttribPointer(loc_col, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	calc_prim_normals(cube_face);
 
@@ -147,7 +145,7 @@ bool uos::init() {
 		cube_face.normals, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(loc_nml);
-	glVertexAttribPointer(loc_nml, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(loc_nml, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	return true;
 }

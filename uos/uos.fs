@@ -25,7 +25,7 @@ void main(){
 	vec3 ambient_color = ambient_light_power * geo_color;	
 	float cos_alpha = clamp(dot(r, e), 0.f, 1.f);
 	
-	vec3 frag_color;
+	vec3 frag_col;
 
 	float dd_lm = distance_lm * distance_lm;
 	if(!btexture){
@@ -36,5 +36,5 @@ void main(){
 		//gl_FragColor = texture(tsampler, geo_st);
 	}
 
-	gl_FragColor = vec4(frag_color, 1.f);
+	gl_FragColor = vec4(frag_col, 1.f);
 };

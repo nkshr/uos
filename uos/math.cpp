@@ -127,7 +127,7 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 
 void calc_prim_normals(vertices vtxs) {
 	for (int i = 0; i < vtxs.num_prims; ++i) {
-		int *indices = &vtxs.indices[i * 3];
+		uint *indices = &vtxs.indices[i * 3];
 		const int ipos0 = indices[0] * 3;
 		float *pos0 = &vtxs.poss[ipos0];
 		const int ipos1 = indices[1] * 3;

@@ -90,6 +90,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>opencv_world320d.lib;opengl32.lib;glew32d.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,6 +131,8 @@
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cube.fs" />
+    <None Include="cube.vs" />
     <None Include="uos.fs" />
     <None Include="uos.gs" />
     <None Include="uos.vs" />

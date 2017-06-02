@@ -2,9 +2,8 @@
 
 class uos {
 private:
-	const char *vsname;
-	const char *gsname;
-	const char *fsname;
+	const char *cube_vsname;
+	const char *cube_fsname;
 
 	shader_prog cube_sprog;
 	shader_prog light_sprog;

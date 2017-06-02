@@ -7,6 +7,7 @@ public:
 	bool create_shader(const char *fname, GLenum stype);
 	bool create_prog();
 	void destroy();
+	void bind();
 	void use();
 
 	int get_attrib_loc(const char *param);
@@ -20,6 +21,7 @@ private:
 	GLuint gs;
 	GLuint fs;
 	GLuint program;
+	GLuint vao;
 };
 void check_gl_error(const char *file, int line);
 void set_cube_vertices(const float length, float *buf);

@@ -49,6 +49,12 @@
     <None Include="uos.gs">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="cube.vs">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="cube.fs">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="snow.jpg">

@@ -42,6 +42,9 @@ shader_prog::shader_prog(){
 }
 
 bool shader_prog::create_prog() {
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	program = glCreateProgram();
 
 	if(vs)
@@ -84,6 +87,8 @@ void shader_prog::destroy() {
 	glDeleteShader(fs);
 	glDeleteShader(gs);
 	glDeleteShader(program);
+
+	glDeleteVertexArrays(1, &vao);
 }
 
 shader_prog::~shader_prog() {
@@ -107,6 +112,10 @@ void shader_prog::set_val(const char *param, const float val) {
 void shader_prog::set_mat4(const char *param, const float *data) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
+}
+
+void shader_prog::bind() {
+	glBindVertexArray(vao);
 }
 
 void shader_prog::use() {
