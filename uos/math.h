@@ -7,6 +7,7 @@ void get_frustum(const float l, const float r,
 void get_ortho(const float l, const float r,
 	const float b, const float t,
 	const float n, const float f, Matrix4f &P);
+void get_perspective(const float fov, const float aspect, const float near, const float far, Matrix4f &P);
 void get_Rx(const float ang, Matrix4f &R);
 void get_Ry(const float ang, Matrix4f &R);
 void get_Rz(const float ang, Matrix4f &R);

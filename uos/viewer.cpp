@@ -55,15 +55,19 @@ int main(int argc, char ** argv) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
 	uos simulator;
+	if (!simulator.init())
+		return false;
 
-	simulator.set_light_pos(0.f, 500.f, 500.f);
+
+	simulator.set_light_pos(0.f, 0.f, 3000.f);
 	simulator.set_light_col(1.f, 1.f, 1.f);
-	simulator.set_light_pwr(200000);
+	simulator.set_light_pwr(20000000);
 	simulator.set_amb_light_pwr(0.1f, 0.1f, 0.1f);
+	simulator.set_spec_col(0.3f, 0.3f, 0.3f);
 	////simulator.set_ambient_light_power(0.1f, 0.1f, 0.1f);
 	////simulator.set_ambient_light_power(1.f, 1.f, 1.f);
 	////simulator.set_ambient_light_power(0.f, 0.f, 0.f);
@@ -77,12 +81,10 @@ int main(int argc, char ** argv) {
 		return false;
 	}
 
-
-	if (!simulator.init())
-		return false;
-
 	Matrix4f proj;
-	get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
+	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
+	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 2000.f, proj);
+	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 2000, proj);
 	simulator.set_proj(proj.data());
 	cout << "proj : " << proj << endl;
 
@@ -95,7 +97,7 @@ int main(int argc, char ** argv) {
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
 		Matrix4f view;
-		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f, 3000, view);
+		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,1500, view);
 		simulator.set_view(view.data());
 
 		Matrix4f cube_model;

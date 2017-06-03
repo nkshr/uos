@@ -54,6 +54,15 @@ void get_ortho(const float l, const float r,
 		0.f, 0.f, 0.f, 1.f;
 }
 
+void get_perspective(const float fov, const float aspect, const float near, const float far, Matrix4f &P) {
+	float top = tan(fov / 2) * near;
+	float bottom = -top;
+	float right = top * aspect;
+	float left = -right;
+	cout << top << endl;
+	get_frustum(left, right, bottom, top, near, far, P);
+}
+
 void get_Rx(const float ang, Matrix4f &R) {
 	const float c = cosf(ang);
 	const float s = sinf(ang);
@@ -127,7 +136,8 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 
 void calc_prim_normals(vertices vtxs) {
 	for (int i = 0; i < vtxs.num_prims; ++i) {
-		uint *indices = &vtxs.indices[i * 3];
+		int j = i * 3;
+		uint *indices = &vtxs.indices[j];
 		const int ipos0 = indices[0] * 3;
 		float *pos0 = &vtxs.poss[ipos0];
 		const int ipos1 = indices[1] * 3;
@@ -137,7 +147,11 @@ void calc_prim_normals(vertices vtxs) {
 	
 		cross(pos2[0] - pos0[0], pos2[1] - pos0[1], pos2[2] - pos0[2], 
 			pos1[0] - pos0[0], pos1[1] - pos0[1], pos1[2] - pos0[2],
-			vtxs.prim_normals[ipos0], vtxs.prim_normals[ipos1], vtxs.prim_normals[ipos2]);
-		normalize(vtxs.prim_normals[ipos0], vtxs.prim_normals[ipos1], vtxs.prim_normals[ipos2]);
+			vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
+		normalize(vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
 	}	
+
+	//for (int i = 0; i < vtxs.num_prims; ++i) {
+	//	cout << vtxs.prim_normals[i * 3] << ", " << vtxs.prim_normals[i * 3 + 1] << ", " << vtxs.prim_normals[i * 3 + 2] << endl;
+	//}
 }

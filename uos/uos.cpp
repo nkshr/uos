@@ -19,7 +19,7 @@ using namespace cv;
 #include "uos.h"
 
 #define NUM_CUBE_VERTICES 36
-#define CUBE_LEN 600
+#define CUBE_LEN 200
 
 uos::uos() {
 	cube_vsname = "cube.vs";
@@ -54,7 +54,7 @@ void uos::draw() {
 
 
 void uos::draw_cube_face() {
-	cube_sprog.bind();
+	//cube_sprog.bind();
 	//cube_sprog.use();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
@@ -70,6 +70,7 @@ bool uos::init() {
 		return false;
 
 	cube_face.num_vertices = NUM_CUBE_VERTICES;
+	cube_face.num_prims = NUM_CUBE_VERTICES / 3;
 	cube_face.poss = new float[cube_face.num_vertices * 3];
 	set_cube_vertices(CUBE_LEN, cube_face.poss);
 
@@ -129,14 +130,25 @@ bool uos::init() {
 	glEnableVertexAttribArray(loc_col);
 	glVertexAttribPointer(loc_col, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
+	cube_face.prim_normals = new float[cube_face.num_prims * 3];
 	calc_prim_normals(cube_face);
 
+	cube_face.normals = new float[cube_face.num_vertices * 3];
 	for (int i = 0; i < cube_face.num_prims; ++i) {
 		int j = i * 3;
-		cube_face.normals[j] = cube_face.prim_normals[i];
-		cube_face.normals[j + 1] = cube_face.prim_normals[i];
-		cube_face.normals[j + 2] = cube_face.prim_normals[i];
+		int k = i * 9;
+
+		for (int l = 0; l < 3; ++l) {
+			cube_face.normals[k++] = cube_face.prim_normals[j];
+			cube_face.normals[k++] = cube_face.prim_normals[j + 1];
+			cube_face.normals[k++] = cube_face.prim_normals[j + 2];
+		}
 	}
+
+	//for (int i = 0; i < cube_face.num_vertices; ++i) {
+	//	int j = i * 3;
+	//	cout << cube_face.normals[j] << ", " << cube_face.normals[j + 1] << ", " << cube_face.normals[j + 2] << endl;
+	//}
 
 	glGenBuffers(1, &cube_face.nbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, cube_face.nbuf_id);
@@ -156,12 +168,12 @@ void uos::destroy() {
 
 void uos::set_proj(const float  *proj) {
 	cube_sprog.set_mat4("proj", proj);
-	light_sprog.set_mat4("proj", proj);
+	//light_sprog.set_mat4("proj", proj);
 }
 
 void uos::set_view(const float *light) {
 	cube_sprog.set_mat4("view", light);
-	light_sprog.set_mat4("view", light);
+	//light_sprog.set_mat4("view", light);
 }
 
 void uos::set_cube_model(const  float *model) {
@@ -169,8 +181,8 @@ void uos::set_cube_model(const  float *model) {
 }
 
 void uos::set_light_pos(const float x, const float y, const float z) {
-	cube_sprog.set_vec3("light_pos", x, y, z);
-	light_sprog.set_vec3("light_pos", x, y, z);
+	cube_sprog.set_vec3("light_pos_world", x, y, z);
+	//light_sprog.set_vec3("light_pos_world", x, y, z);
 }
 
 void uos::set_light_col(const float r, const float g, const float b) {
