@@ -7,7 +7,6 @@ public:
 	bool create_shader(const char *fname, GLenum stype);
 	bool create_prog();
 	void destroy();
-	void bind();
 	void use();
 
 	int get_attrib_loc(const char *param);

@@ -19,33 +19,18 @@ using namespace cv;
 #include "uos.h"
 
 #define NUM_CUBE_VERTICES 36
-#define CUBE_LEN 200
+#define CUBE_LEN 1500
+#define LIGHT_CUBE_LEN 500
 
 uos::uos() {
-	cube_vsname = "cube.vs";
-	cube_fsname = "cube.fs";
+	cube_face_vsname = "cube.vs";
+	cube_face_fsname = "cube.fs";
+	light_cube_vsname = "light_cube.vs";
+	light_cube_fsname = "light_cube.fs";
 }
 
 uos::~uos() {
 
-}
-
-bool uos::prepare_shader_prog() {
-	if (!cube_sprog.create_shader(cube_vsname, GL_VERTEX_SHADER))
-		return false;
-	if (!cube_sprog.create_shader(cube_fsname, GL_FRAGMENT_SHADER))
-		return false;
-
-	if (!cube_sprog.create_prog())
-		return false;
-
-	loc_pos = cube_sprog.get_attrib_loc("pos_model");
-	loc_col = cube_sprog.get_attrib_loc("col");
-	loc_st = cube_sprog.get_attrib_loc("st");
-	loc_nml = cube_sprog.get_attrib_loc("normal_model");
-	cube_sprog.bind();
-	cube_sprog.use();
-	return true;
 }
 
 void uos::draw() {
@@ -54,8 +39,17 @@ void uos::draw() {
 
 
 void uos::draw_cube_face() {
-	//cube_sprog.bind();
-	//cube_sprog.use();
+	cube_face_sprog.use();
+	cube_face_sprog.set_mat4("model", cube_model.data());
+	cube_face_sprog.set_mat4("view", view.data());
+	cube_face_sprog.set_mat4("proj", proj.data());
+	cube_face_sprog.set_vec3("light_pos_world", light_pos(0), light_pos(1), light_pos(2));
+	cube_face_sprog.set_vec3("light_col", light_col(0), light_col(1), light_col(2));
+	cube_face_sprog.set_vec3("amb_light_pwr", amb_light_pwr(0), amb_light_pwr(1), amb_light_pwr(2));
+	cube_face_sprog.set_vec3("spec_light_col", spec_light_col(0), spec_light_col(1), spec_light_col(2));
+	cube_face_sprog.set_val("light_pwr", light_pwr);
+
+
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
@@ -66,8 +60,26 @@ void uos::destroy_cube_face() {
 }
 
 bool uos::init() {
-	if (!prepare_shader_prog())
+	if (!init_cube_face() || !init_light_cube()) {
 		return false;
+	}
+	return true;
+}
+
+bool uos::init_cube_face() {
+	if (!cube_face_sprog.create_shader(cube_face_vsname, GL_VERTEX_SHADER))
+		return false;
+	if (!cube_face_sprog.create_shader(cube_face_fsname, GL_FRAGMENT_SHADER))
+		return false;
+
+	if (!cube_face_sprog.create_prog())
+		return false;
+
+	loc_cube_face_pos = cube_face_sprog.get_attrib_loc("pos_model");
+	loc_cube_face_col = cube_face_sprog.get_attrib_loc("col");
+	loc_cube_face_st = cube_face_sprog.get_attrib_loc("st");
+	loc_cube_face_normal = cube_face_sprog.get_attrib_loc("normal_model");
+	cube_face_sprog.use();
 
 	cube_face.num_vertices = NUM_CUBE_VERTICES;
 	cube_face.num_prims = NUM_CUBE_VERTICES / 3;
@@ -83,8 +95,8 @@ bool uos::init() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * cube_face.num_vertices,
 		cube_face.poss, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(loc_pos);
-	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(loc_cube_face_pos);
+	glVertexAttribPointer(loc_cube_face_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	cube_face.indices = new uint[cube_face.num_vertices];
 	for (int i = 0; i < cube_face.num_vertices; ++i) {
@@ -127,8 +139,8 @@ bool uos::init() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * cube_face.num_vertices,
 		cube_face.cols, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(loc_col);
-	glVertexAttribPointer(loc_col, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(loc_cube_face_col);
+	glVertexAttribPointer(loc_cube_face_col, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	cube_face.prim_normals = new float[cube_face.num_prims * 3];
 	calc_prim_normals(cube_face);
@@ -156,47 +168,72 @@ bool uos::init() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * cube_face.num_vertices,
 		cube_face.normals, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(loc_nml);
-	glVertexAttribPointer(loc_nml, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(loc_cube_face_normal);
+	glVertexAttribPointer(loc_cube_face_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	return true;
 }
 
+bool uos::init_light_cube() {
+	if (!light_cube_sprog.create_shader(light_cube_vsname, GL_VERTEX_SHADER))
+		return false;
+	if (!light_cube_sprog.create_shader(light_cube_fsname, GL_FRAGMENT_SHADER))
+		return false;
+
+	if (!light_cube_sprog.create_prog())
+		return false;
+
+	loc_light_cube_pos = light_cube_sprog.get_attrib_loc("pos_model");
+	light_cube_sprog.use();
+
+	light_cube.num_vertices = NUM_CUBE_VERTICES;
+	light_cube.num_prims = NUM_CUBE_VERTICES / 3;
+	light_cube.poss = new float[light_cube.num_vertices * 3];
+	set_cube_vertices(LIGHT_CUBE_LEN, light_cube.poss);
+
+	glGenBuffers(1, &light_cube.vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, light_cube.vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * light_cube.num_vertices,
+		light_cube.poss, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_light_cube_pos);
+	glVertexAttribPointer(loc_light_cube_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	return true;
+}
+
 void uos::destroy() {
-	cube_sprog.destroy();
+	cube_face_sprog.destroy();
 }
 
-void uos::set_proj(const float  *proj) {
-	cube_sprog.set_mat4("proj", proj);
-	//light_sprog.set_mat4("proj", proj);
+void uos::set_proj(const Matrix4f &proj) {
+	this->proj = proj;
 }
 
-void uos::set_view(const float *light) {
-	cube_sprog.set_mat4("view", light);
-	//light_sprog.set_mat4("view", light);
+void uos::set_view(const Matrix4f &view) {
+	this->view = view;
 }
 
-void uos::set_cube_model(const  float *model) {
-	cube_sprog.set_mat4("model", model);
+void uos::set_cube_model(const  Matrix4f &model) {
+	cube_model = model;
 }
 
-void uos::set_light_pos(const float x, const float y, const float z) {
-	cube_sprog.set_vec3("light_pos_world", x, y, z);
-	//light_sprog.set_vec3("light_pos_world", x, y, z);
+void uos::set_light_pos(const Vector3f &light_pos) {
+	this->light_pos = light_pos;
 }
 
-void uos::set_light_col(const float r, const float g, const float b) {
-	cube_sprog.set_vec3("light_col", r, g, b);
+void uos::set_light_col(const Vector3f &light_col) {
+	this->light_col = light_col;
 }
 
-void uos::set_amb_light_pwr(const float r, const float g, const float b) {
-	cube_sprog.set_vec3("amb_light_pwr", r, g, b);
+void uos::set_amb_light_pwr(const Vector3f &amb_light_pwr) {
+	this->amb_light_pwr = amb_light_pwr;
 }
 
-void uos::set_light_pwr(const float pwr) {
-	cube_sprog.set_val("light_pwr", pwr);
+void uos::set_spec_light_col(const Vector3f &spec_light_col) {
+	this->spec_light_col = spec_light_col;
 }
 
-void uos::set_spec_col(const float r, const float g, const float b) {
-	cube_sprog.set_vec3("spec_light_col", r, g, b);
+void uos::set_light_pwr(const float light_pwr) {
+	this->light_pwr = light_pwr;
 }
+

@@ -3,7 +3,6 @@
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform mat4 mvp;
 uniform vec3 light_pos_world;
 
 in vec3 col;

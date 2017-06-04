@@ -24,9 +24,7 @@ void main(){
 
 	float cos_alpha = clamp(dot(r, e), 0.f, 1.f);
 	vec3 amb_col = amb_light_pwr * vertex_col;
-	//vec3 frag_col = amb_col+ cos_theta * vertex_col * light_col * light_pos_world / lmdd + spec_col * light_col * light_pwr * pow(cos_alpha, 5.f)/ lmdd;
-	//vec3 frag_col = spec_light_col * light_col * light_pwr *  pow(cos_alpha, 5.f) / lmdd;
-	vec3 frag_col = vertex_col;
+	vec3 frag_col = amb_col+ cos_theta * vertex_col * light_col * light_pos_world / lmdd + spec_light_col * light_col * light_pwr * pow(cos_alpha, 5.f)/ lmdd;
 	gl_FragColor = vec4(frag_col, 1.f);
 	//gl_FragColor = vec4(1.f, 0.f, 0.f, 1.f);
 }

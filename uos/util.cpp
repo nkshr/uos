@@ -114,11 +114,8 @@ void shader_prog::set_mat4(const char *param, const float *data) {
 	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
 }
 
-void shader_prog::bind() {
-	glBindVertexArray(vao);
-}
-
 void shader_prog::use() {
+	glBindVertexArray(vao);
 	glUseProgram(program);
 }
 

@@ -61,19 +61,21 @@ int main(int argc, char ** argv) {
 	uos simulator;
 	if (!simulator.init())
 		return false;
+	Vector3f light_pos;
+	light_pos << 0.f, 0.f, 3000.f;
+	simulator.set_light_pos(light_pos);
+	
+	Vector3f light_col(1.f, 1.f, 1.f);
+	cout << light_col << endl;
+	simulator.set_light_col(light_col);
+	
+	simulator.set_light_pwr(10000000);
 
+	Vector3f amb_light_pwr(0.1f, 0.1f, 0.1f);
+	simulator.set_amb_light_pwr(amb_light_pwr);
 
-	simulator.set_light_pos(0.f, 0.f, 3000.f);
-	simulator.set_light_col(1.f, 1.f, 1.f);
-	simulator.set_light_pwr(20000000);
-	simulator.set_amb_light_pwr(0.1f, 0.1f, 0.1f);
-	simulator.set_spec_col(0.3f, 0.3f, 0.3f);
-	////simulator.set_ambient_light_power(0.1f, 0.1f, 0.1f);
-	////simulator.set_ambient_light_power(1.f, 1.f, 1.f);
-	////simulator.set_ambient_light_power(0.f, 0.f, 0.f);
-	//simulator.set_specular_color(0.3f, 0.3f, 0.3f);
-	////simulator.set_specular_color(1.f, 1.f, 1.f);
-	//simulator.set_light_power(200000);
+	Vector3f spec_col(0.3f, 0.3f, 0.3f);
+	simulator.set_spec_light_col(spec_col);
 
 	Mat texture = imread(texture_name);
 	if (texture.empty()) {
@@ -84,9 +86,9 @@ int main(int argc, char ** argv) {
 	Matrix4f proj;
 	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
 	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 2000.f, proj);
-	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 2000, proj);
-	simulator.set_proj(proj.data());
+	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 4000, proj);
 	cout << "proj : " << proj << endl;
+	simulator.set_proj(proj);
 
 	float ang = 0.f;
 	while (!glfwWindowShouldClose(window)) {
@@ -97,13 +99,13 @@ int main(int argc, char ** argv) {
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
 		Matrix4f view;
-		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,1500, view);
-		simulator.set_view(view.data());
+		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,3000, view);
+		simulator.set_view(view);
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
-		simulator.set_cube_model(cube_model.data());
-
+		simulator.set_cube_model(cube_model);
+		cout << ang << endl;
 		ang += 1.f;
 
 		if (ang > 360) {
