@@ -1,11 +1,12 @@
 #version 440
 
 uniform mat4 mvp;
-uniform vec3 light_pos_world;
-uniform col
 
 in vec3 pos_model;
+in vec3 col;
+out vec3 vertex_col;
 
 void main(){
-	gl_Position = mvp * pos_model;
+	gl_Position = mvp * vec4(pos_model, 1.f);
+	vertex_col = col;
 }

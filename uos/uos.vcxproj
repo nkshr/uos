@@ -135,6 +135,7 @@
     <None Include="cube.vs" />
     <None Include="light_cube.fs" />
     <None Include="light_cube.vs" />
+    <None Include="line.fs" />
     <None Include="line.gs" />
     <None Include="line.vs" />
     <None Include="uos.fs" />

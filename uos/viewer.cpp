@@ -26,6 +26,48 @@ using namespace cv;
 const int win_width = 1280;
 const int win_height = 960;
 const char * texture_name = "golddiag.jpg";
+const float trans_step = 100.f;
+const float rot_step = 1.f;
+observer obsv;
+
+static void key_callback(GLFWwindow *wiindow, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_W:
+			obsv.go_forward(trans_step);
+			break;
+		case GLFW_KEY_S:
+			obsv.go_backword(trans_step);
+			break;
+		case GLFW_KEY_D:
+			obsv.go_right(trans_step);
+			break;
+		case GLFW_KEY_A:
+			obsv.go_left(trans_step);
+			break;
+		case GLFW_KEY_UP:
+			if (GLFW_MOD_SHIFT == mods)
+				obsv.go_up(trans_step);
+			else
+				obsv.turn_up(deg_to_rad(rot_step));
+			break;
+		case GLFW_KEY_DOWN:
+			if (GLFW_MOD_SHIFT == mods)
+				obsv.go_down(trans_step);
+			else
+				obsv.turn_down(deg_to_rad(rot_step));
+			break;
+		case GLFW_KEY_LEFT:
+			obsv.turn_left(deg_to_rad(rot_step));
+			break;
+		case GLFW_KEY_RIGHT:
+			obsv.turn_right(deg_to_rad(rot_step));
+			break;
+		default:
+			break;
+		}
+	}
+}
 
 int main(int argc, char ** argv) {
 	GLFWwindow* window;
@@ -44,6 +86,8 @@ int main(int argc, char ** argv) {
 	//glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
 
+	glfwSetKeyCallback(window, key_callback);
+
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
 		cerr << "Error : " << glewGetErrorString(err);
@@ -61,12 +105,10 @@ int main(int argc, char ** argv) {
 	uos simulator;
 	if (!simulator.init())
 		return false;
-	Vector3f light_pos;
-	light_pos << 0.f, 0.f, 3000.f;
+	Vector3f light_pos(500.f, 0.f, 1500.f);
 	simulator.set_light_pos(light_pos);
 	
 	Vector3f light_col(1.f, 1.f, 1.f);
-	cout << light_col << endl;
 	simulator.set_light_col(light_col);
 	
 	simulator.set_light_pwr(10000000);
@@ -83,13 +125,16 @@ int main(int argc, char ** argv) {
 		return false;
 	}
 
-	Matrix4f proj;
-	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 10000.f, proj);
-	//get_frustum(-640.f, 640.f, -480.f, 480.f, 1000.f, 2000.f, proj);
-	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 4000, proj);
-	cout << "proj : " << proj << endl;
-	simulator.set_proj(proj);
+	obsv.center = Vector3f(0.f, 0.f, 0.f);
+	obsv.up = Vector3f(0.f, 1.f, 0.f);
 
+	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 4500, obsv.proj);
+	cout << "proj : " << obsv.proj << endl;
+	simulator.set_proj(obsv.proj);
+
+	obsv.eye = Vector3f(0.f, 0.f, 3000.f);
+	//get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,3000, obsv.view);
+	obsv.update();
 	float ang = 0.f;
 	while (!glfwWindowShouldClose(window)) {
 		int frame_width, frame_height;
@@ -98,16 +143,14 @@ int main(int argc, char ** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
-		Matrix4f view;
-		get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,3000, view);
-		simulator.set_view(view);
+		simulator.set_view(obsv.view);
+		//cout << obsv.view << endl;
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
 		simulator.set_cube_model(cube_model);
-		cout << ang << endl;
 		ang += 1.f;
-
+		
 		if (ang > 360) {
 			ang = 0.f;
 		}

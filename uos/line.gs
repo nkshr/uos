@@ -1,11 +1,16 @@
 #version 440
-layout(lines, invocations = 1) in;
-layout(line_strip, max_vertices = 10) out;)
 
-uniform int width;
+layout(lines, invocations = 1) in;
+layout(line_strip, max_vertices = 2) out;
+
+in vec3 vertex_col[];
+out vec3 geo_col;
+
 void main(){
-	vec3 grad = 1.f / (gl_in[0].gl_Position - gl_in[1].gl_Position);
-	for(int i = 0; i < width; ++i){
-	
+	for(int i = 0; i < 2; ++i){
+		gl_Position = gl_in[i].gl_Position;
+		geo_col = vertex_col[i];
+		EmitVertex();
 	}
+	EndPrimitive();
 }

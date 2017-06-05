@@ -4,10 +4,14 @@ class uos {
 private:
 	const char *cube_face_vsname;
 	const char *cube_face_fsname;
+	const char *cube_wire_vsname;
+	const char *cube_wire_gsname;
+	const char *cube_wire_fsname;
 	const char *light_cube_vsname;
 	const char *light_cube_fsname;
-
+	
 	shader_prog cube_face_sprog;
+	shader_prog cube_wire_sprog;
 	shader_prog light_cube_sprog;
 
 	GLuint loc_cube_face_pos;
@@ -15,10 +19,14 @@ private:
 	GLuint loc_cube_face_st;
 	GLuint loc_cube_face_normal;
 
+	GLuint loc_cube_wire_pos;
+	GLuint loc_cube_wire_col;
+
 	GLuint loc_light_cube_pos;
 
 	vertices cube_face;
 	vertices light_cube;
+	vertices cube_wire;
 
 	Matrix4f cube_model;
 	Matrix4f view;
@@ -30,7 +38,12 @@ private:
 	float light_pwr;
 
 	void draw_cube_face();
+	void draw_cube_wire();
+	void draw_light_cube();
+
 	void destroy_cube_face();
+	void destroy_cube_wire();
+	void destroy_light_cube();
 
 public:
 	uos();
@@ -38,11 +51,11 @@ public:
 
 	bool init();
 	bool init_cube_face();
+	bool init_cube_wire();
 	bool init_light_cube();
-
+	
 	void destroy();
 
-	//bool prepare_shader_prog();
 	void draw();
 
 
