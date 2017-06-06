@@ -83,9 +83,7 @@ int main(int argc, char ** argv) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	//glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
-
 	glfwSetKeyCallback(window, key_callback);
 
 	GLenum err = glewInit();
@@ -113,7 +111,7 @@ int main(int argc, char ** argv) {
 	
 	simulator.set_light_pwr(10000000);
 
-	Vector3f amb_light_pwr(0.1f, 0.1f, 0.1f);
+	Vector3f amb_light_pwr(0.5f, 0.5f, 0.5f);
 	simulator.set_amb_light_pwr(amb_light_pwr);
 
 	Vector3f spec_col(0.3f, 0.3f, 0.3f);
@@ -129,11 +127,9 @@ int main(int argc, char ** argv) {
 	obsv.up = Vector3f(0.f, 1.f, 0.f);
 
 	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 4500, obsv.proj);
-	cout << "proj : " << obsv.proj << endl;
 	simulator.set_proj(obsv.proj);
 
 	obsv.eye = Vector3f(0.f, 0.f, 3000.f);
-	//get_SE3_inv(deg_to_rad(0), deg_to_rad(0), deg_to_rad(0), 0.f, 0.f,3000, obsv.view);
 	obsv.update();
 	float ang = 0.f;
 	while (!glfwWindowShouldClose(window)) {
@@ -144,7 +140,6 @@ int main(int argc, char ** argv) {
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
 		simulator.set_view(obsv.view);
-		//cout << obsv.view << endl;
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);

@@ -37,8 +37,8 @@ uos::~uos() {
 }
 
 void uos::draw() {
-	//draw_cube_face();
-	draw_cube_wire();
+	draw_cube_face();
+	//draw_cube_wire();
 	draw_light_cube();
 }
 

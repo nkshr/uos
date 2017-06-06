@@ -40,15 +40,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="uos.vs">
-      <Filter>リソース ファイル</Filter>
-    </None>
-    <None Include="uos.fs">
-      <Filter>リソース ファイル</Filter>
-    </None>
-    <None Include="uos.gs">
-      <Filter>リソース ファイル</Filter>
-    </None>
     <None Include="cube.vs">
       <Filter>リソース ファイル</Filter>
     </None>

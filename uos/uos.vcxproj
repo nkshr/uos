@@ -138,9 +138,6 @@
     <None Include="line.fs" />
     <None Include="line.gs" />
     <None Include="line.vs" />
-    <None Include="uos.fs" />
-    <None Include="uos.gs" />
-    <None Include="uos.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="golddiag.jpg" />
