@@ -24,7 +24,7 @@ using namespace cv;
 #include "math.h"
 #include "drawing_component.h"
 
-Phong_light c_draw_comp::light;
+s_Phong_light c_draw_comp::light;
 Matrix4f c_draw_comp::view;
 Matrix4f c_draw_comp::proj;
 Matrix4f c_draw_comp::vp;
@@ -37,7 +37,7 @@ void c_draw_comp::set_proj(const Matrix4f &_proj) {
 	proj = _proj;
 }
 
-void c_draw_comp::set_light(const Phong_light &_light) {
+void c_draw_comp::set_light(const s_Phong_light &_light) {
 	light = _light;
 }
 

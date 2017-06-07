@@ -124,14 +124,14 @@ struct observer {
 	}
 };
 
-struct Phong_light {
+struct s_Phong_light {
 	float pwr;
 	Vector3f pos;
 	Vector3f col;
 	Vector3f amb_light_pwr;
 	Vector3f spec_light_col;
 
-	Phong_light(): pwr(1000), col(1.f, 1.f, 1.f),
+	s_Phong_light(): pwr(1000), col(1.f, 1.f, 1.f),
 		amb_light_pwr(0.3f, 0.3f, 0.3f), spec_light_col(1.f, 1.f, 1.f) {
 	};
 };

@@ -19,16 +19,16 @@ using namespace cv;
 #include "drawing_component.h"
 #include "uos.h"
 
-uos::uos() {
+c_uos::c_uos() {
 }
 
-uos::~uos() {
+c_uos::~c_uos() {
 
 }
 
-void uos::draw() {
+void c_uos::draw() {
 	c_draw_comp::set_light(light);
-	//cube.draw();
+	cube.draw();
 	wire_cube.draw();
 	light_cube.draw();
 	wire_plane.draw();
@@ -36,7 +36,7 @@ void uos::draw() {
 
 
 
-bool uos::init() {
+bool c_uos::init() {
 	if (!cube.init())
 		return false;
 	if (!wire_cube.init())
@@ -49,39 +49,22 @@ bool uos::init() {
 	return true;
 }
 
-void uos::destroy() {
+void c_uos::destroy() {
 }
 
-void uos::set_proj(const Matrix4f &proj) {
+void c_uos::set_proj(const Matrix4f &proj) {
 	c_draw_comp::set_proj(proj);
 }
 
-void uos::set_view(const Matrix4f &view) {
+void c_uos::set_view(const Matrix4f &view) {
 	c_draw_comp::set_view(view);
 }
 
-void uos::set_cube_model(const  Matrix4f &model) {
+void c_uos::set_cube_model(const  Matrix4f &model) {
 	cube.set_model(model);
 	wire_cube.set_model(model);
 }
 
-void uos::set_light_pos(const Vector3f &light_pos) {
-	light.pos = light_pos;
+void c_uos::set_light(const s_Phong_light &light) {
+	this->light = light;
 }
-
-void uos::set_light_col(const Vector3f &light_col) {
-	light.col = light_col;
-}
-
-void uos::set_amb_light_pwr(const Vector3f &amb_light_pwr) {
-	light.amb_light_pwr = amb_light_pwr;
-}
-
-void uos::set_spec_light_col(const Vector3f &spec_light_col) {
-	light.spec_light_col = spec_light_col;
-}
-
-void uos::set_light_pwr(const float light_pwr) {
-	light.pwr = light_pwr;
-}
-

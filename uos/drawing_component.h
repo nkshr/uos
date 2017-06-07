@@ -11,7 +11,7 @@ protected:
 	static Matrix4f vp;
 	Matrix4f mvp;
 
-	static Phong_light light;
+	static s_Phong_light light;
 	GLuint loc_pos;
 	GLuint loc_col;
 	GLuint loc_st;
@@ -29,7 +29,7 @@ public:
 
 	static void set_view(const Matrix4f &view);
 	static void set_proj(const Matrix4f &proj);
-	static void set_light(const Phong_light &light);
+	static void set_light(const s_Phong_light &light);
 
 	void set_model(const Matrix4f &model);
 };

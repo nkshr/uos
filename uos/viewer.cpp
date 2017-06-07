@@ -100,22 +100,17 @@ int main(int argc, char ** argv) {
 	//glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	uos simulator;
+	c_uos simulator;
 	if (!simulator.init())
 		return false;
-	Vector3f light_pos(500.f, 0.f, 1500.f);
-	simulator.set_light_pos(light_pos);
-	
-	Vector3f light_col(1.f, 1.f, 1.f);
-	simulator.set_light_col(light_col);
-	
-	simulator.set_light_pwr(10000000);
 
-	Vector3f amb_light_pwr(0.5f, 0.5f, 0.5f);
-	simulator.set_amb_light_pwr(amb_light_pwr);
-
-	Vector3f spec_col(0.3f, 0.3f, 0.3f);
-	simulator.set_spec_light_col(spec_col);
+	s_Phong_light light;
+	light.pos = Vector3f(500.f, 0.f, 1500.f);
+	light.col = Vector3f(1.f, 1.f, 1.f);
+	light.pwr = 10000000;
+	light.amb_light_pwr = Vector3f(0.5f, 0.5f, 0.5f);
+	light.spec_light_col = Vector3f(1.f, 1.f, 1.f);
+	simulator.set_light(light);
 
 	Mat texture = imread(texture_name);
 	if (texture.empty()) {

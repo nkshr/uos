@@ -140,7 +140,6 @@
     <None Include="line.fs" />
     <None Include="line.gs" />
     <None Include="line.vs" />
-    <None Include="world_frame.gs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="golddiag.jpg" />
