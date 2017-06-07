@@ -22,7 +22,7 @@ private:
 	GLuint program;
 	GLuint vao;
 };
-void check_gl_error(const char *file, int line);
+bool check_gl(const char *place);
 void set_cube_vertices(const float length, float *buf);
 
 void set_vec3(const float v0, const float v1, const float v2, float * _buf);
@@ -122,4 +122,16 @@ struct observer {
 		up = R * up;
 		update();
 	}
+};
+
+struct Phong_light {
+	float pwr;
+	Vector3f pos;
+	Vector3f col;
+	Vector3f amb_light_pwr;
+	Vector3f spec_light_col;
+
+	Phong_light(): pwr(1000), col(1.f, 1.f, 1.f),
+		amb_light_pwr(0.3f, 0.3f, 0.3f), spec_light_col(1.f, 1.f, 1.f) {
+	};
 };

@@ -164,23 +164,27 @@ bool shader_prog::create_shader(const char * fname, GLenum stype) {
 	return static_cast<bool>(shader);
 }
 
-void check_gl_error(const char *file, int line) {
-	GLenum err(glGetError());
+bool check_gl(const char *place) {
 
-	while (err != GL_NO_ERROR) {
-		string error;
-
+	bool ok = true;
+	while (true) {
+		GLenum err(glGetError());
+		if (err == GL_NO_ERROR)
+			break;
+		ok = false;
+		
+		string err_str;
 		switch (err) {
-		case GL_INVALID_OPERATION:      error = "INVALID_OPERATION";      break;
-		case GL_INVALID_ENUM:           error = "INVALID_ENUM";           break;
-		case GL_INVALID_VALUE:          error = "INVALID_VALUE";          break;
-		case GL_OUT_OF_MEMORY:          error = "OUT_OF_MEMORY";          break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
+			case GL_INVALID_OPERATION:      err_str = "INVALID_OPERATION";      break;
+			case GL_INVALID_ENUM:           err_str = "INVALID_ENUM";           break;
+			case GL_INVALID_VALUE:          err_str = "INVALID_VALUE";          break;
+			case GL_OUT_OF_MEMORY:          err_str = "OUT_OF_MEMORY";          break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:  err_str = "INVALID_FRAMEBUFFER_OPERATION";  break;
 		}
 
-		cerr << "GL_" << error.c_str() << " - " << file << ":" << line << endl;
-		err = glGetError();
+		cerr << "GL_" << err_str.c_str() << " at " << place << endl;
 	}
+	return ok;
 }
 
 

@@ -20,7 +20,7 @@ using namespace cv;
 
 #include "util.h"
 #include "math.h"
-//#include "drawing_tool.h"
+#include "drawing_component.h"
 #include "uos.h"
 
 const int win_width = 1280;
