@@ -27,7 +27,6 @@ c_uos::~c_uos() {
 }
 
 void c_uos::draw() {
-	c_draw_comp::set_light(light);
 	cube.draw();
 	wire_cube.draw();
 	light_cube.draw();
@@ -66,5 +65,5 @@ void c_uos::set_cube_model(const  Matrix4f &model) {
 }
 
 void c_uos::set_light(const s_Phong_light &light) {
-	this->light = light;
+	c_draw_comp::set_light(light);
 }

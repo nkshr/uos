@@ -1,8 +1,8 @@
 #pragma once
-class shader_prog {
+class s_shader_prog {
 public:
-	shader_prog();
-	~shader_prog();
+	s_shader_prog();
+	~s_shader_prog();
 
 	bool create_shader(const char *fname, GLenum stype);
 	bool create_prog();
@@ -28,7 +28,7 @@ void set_cube_vertices(const float length, float *buf);
 void set_vec3(const float v0, const float v1, const float v2, float * _buf);
 void set_vec4(const float v0, const float v1, const float v2, const float v3, float * _buf);
 
-struct observer {
+struct s_observer {
 	Vector3f center;
 	Vector3f up;
 	Vector3f eye;
@@ -38,7 +38,7 @@ struct observer {
 	Matrix4f proj;
 	Matrix4f view;
 
-	observer() {
+	s_observer() {
 
 	}
 
@@ -135,3 +135,23 @@ struct s_Phong_light {
 		amb_light_pwr(0.3f, 0.3f, 0.3f), spec_light_col(1.f, 1.f, 1.f) {
 	};
 };
+
+class c_dmsg {
+public:
+	char name[1024];
+	c_dmsg(const char *name) {
+		strcpy(this->name, name);
+		cerr << "Entering " << name << endl;
+	}
+
+	~c_dmsg() {
+		cerr << "Exitinig " << name << endl;
+	}
+};
+
+inline bool is_range(const float &min, const float &max, const float &val) {
+	if (min <= val && val < max) {
+		return true;
+	}
+	return false;
+}

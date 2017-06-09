@@ -17,8 +17,6 @@ using namespace cv;
 
 #include "util.h"
 #include "math.h"
-//#include "drawing_tool.h"
-//#include "shader.h"
 
 char * load_text(const char *fname) {
 	FILE * pf = fopen(fname, "rb");
@@ -34,14 +32,13 @@ char * load_text(const char *fname) {
 	fread(txt, 1, size, pf);
 	txt[size] = 0;
 	fclose(pf);
-
 	return txt;
 }
 
-shader_prog::shader_prog(){
+s_shader_prog::s_shader_prog() :vs(0), gs(0), fs(0){
 }
 
-bool shader_prog::create_prog() {
+bool s_shader_prog::create_prog() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
@@ -78,7 +75,7 @@ bool shader_prog::create_prog() {
 }
 
 
-void shader_prog::destroy() {
+void s_shader_prog::destroy() {
 	glDetachShader(program, vs);
 	glDetachShader(program, fs);
 	glDetachShader(program, gs);
@@ -91,35 +88,35 @@ void shader_prog::destroy() {
 	glDeleteVertexArrays(1, &vao);
 }
 
-shader_prog::~shader_prog() {
+s_shader_prog::~s_shader_prog() {
 	destroy();
 }
 
-int shader_prog::get_attrib_loc(const char *param) {
+int s_shader_prog::get_attrib_loc(const char *param) {
 	return glGetAttribLocation(program, param);
 }
 
-void shader_prog::set_vec3(const char *param, const float v0, const float v1, const float v2) {
+void s_shader_prog::set_vec3(const char *param, const float v0, const float v1, const float v2) {
 	GLuint loc =  glGetUniformLocation(program, param);
 	glUniform3f(loc, v0, v1, v2);
 }
 
-void shader_prog::set_val(const char *param, const float val) {
+void s_shader_prog::set_val(const char *param, const float val) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniform1f(loc, val);
 }
 
-void shader_prog::set_mat4(const char *param, const float *data) {
+void s_shader_prog::set_mat4(const char *param, const float *data) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
 }
 
-void shader_prog::use() {
+void s_shader_prog::use() {
 	glBindVertexArray(vao);
 	glUseProgram(program);
 }
 
-bool shader_prog::create_shader(const char * fname, GLenum stype) {
+bool s_shader_prog::create_shader(const char * fname, GLenum stype) {
 	char *ssrc = load_text(fname);
 	if (!ssrc) {
 		cerr << "Error : Couldn't open " << fname << "." << endl;

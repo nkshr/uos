@@ -15,7 +15,7 @@ void get_Sim3(const float s, const float xang, const float yang, const float zan
 	const float x, const float y, const float z, Matrix4f &Sim3);
 void get_SE3_inv(const float xang, const float yang, const float zang, const float x, const float y, const float z, Matrix4f &SE3);
 
-struct vertices{
+struct s_vertices{
 	float *tposs;
 	float *poss;
 	float *normals;
@@ -31,7 +31,7 @@ struct vertices{
 	GLuint nbuf_id;
 };
 
-void calc_prim_normals(vertices);
+void calc_prim_normals(s_vertices vtxs);
 
 inline void cross(const float a0, const float a1, const float a2,
 	const float b0, const float b1, const float b2,
@@ -52,3 +52,7 @@ inline void normalize(float &a, float &b, float &c) {
 inline float deg_to_rad(const float deg) {
 	return static_cast<float>(EIGEN_PI) * deg / 180.f;
 }
+
+float adjustment(const float color, const float  factor, const float gamma);
+void convert_wavelength_to_rgb(const float gamma,
+	const float wl, float &r, float &g, float &b);

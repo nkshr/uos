@@ -25,7 +25,7 @@ void get_proj(const float fx, const float fy,
 		0.f, 0.f, 0.f, 1.f;
 }
 
-//get_frustum refer to http://www.songho.ca/opengl/gl_projectionmatrix.html
+//refer to http://www.songho.ca/opengl/gl_projectionmatrix.html
 void get_frustum(const float l, const float r,
 	const float b, const float t,
 	const float n, const float f, Matrix4f &P) {
@@ -59,7 +59,6 @@ void get_perspective(const float fov, const float aspect, const float near, cons
 	float bottom = -top;
 	float right = top * aspect;
 	float left = -right;
-	cout << top << endl;
 	get_frustum(left, right, bottom, top, near, far, P);
 }
 
@@ -134,7 +133,7 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 		0.f, 0.f, 0.f, 1.f;
 }
 
-void calc_prim_normals(vertices vtxs) {
+void calc_prim_normals(s_vertices vtxs) {
 	for (int i = 0; i < vtxs.num_prims; ++i) {
 		int j = i * 3;
 		uint *indices = &vtxs.indices[j];
@@ -150,8 +149,96 @@ void calc_prim_normals(vertices vtxs) {
 			vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
 		normalize(vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
 	}	
+}
 
-	//for (int i = 0; i < vtxs.num_prims; ++i) {
-	//	cout << vtxs.prim_normals[i * 3] << ", " << vtxs.prim_normals[i * 3 + 1] << ", " << vtxs.prim_normals[i * 3 + 2] << endl;
-	//}
+void cocnvert_rgb_to_hsv(const float r, const float g, const float b,
+	float &h, float &s, float &v) {
+	float max_val = max(r, max(g, b));
+	float min_val = min(r, min(g, b));
+	float c = max_val - min_val;
+
+	h = 0.f;
+	if (abs(c) < FLT_EPSILON) {
+	}
+	else if (max_val == r) {
+		h = fmod((g - b) / c, 6.f);
+	}
+	else if (max_val = g) {
+		h = (b - r) / c + 2;
+	}
+	else {
+		h = (r - g) / c + 4;
+	}
+
+	h = 60 * h;
+	v = max_val;
+
+	if (abs(v) < FLT_EPSILON)
+		s = 0.f;
+	else
+		h = c / v;
+}
+
+float adjustment(const float color, const float  factor, const float gamma) {
+	if (abs(color) < FLT_EPSILON) {
+		return 0.f;
+	}
+	else {
+		return powf(color * factor, gamma);
+	}
+}
+
+void convert_wavelength_to_rgb(const float gamma,
+	const float wl, float &r, float &g, float &b) {
+	if (is_range(380.f, 440.f, wl)) {
+		r = (440.f - wl) / (440.f - 380.f);
+		g = 0.f;
+		b = 1.f;
+	}
+	else if (is_range(440.f, 490.f, wl)) {
+		r = 0.f;
+		g = (wl - 440.f) / (490.f - 440.f);
+		b = 1.f;
+	}
+	else if (is_range(490.f, 510.f, wl)) {
+		r = 0.f;
+		g = 1.f;
+		b = (510.f - wl) / (510.f - 490.f);
+	}
+	else if (is_range(510.f, 580.f, wl)) {
+		r = (wl - 510.f) / (580.f - 510.f);
+		g = 1.f;
+		b = 0.f;
+	}
+	else if (is_range(580.f, 645.f, wl)) {
+		r = 1.f;
+		g = (645.f - wl) / (645.f - 580.f);
+		b = 0.f;
+	}
+	else if (is_range(645.f, 780.f, wl)) {
+		r = 1.f;
+		g = 0.f;
+		b = 0.f;
+	}
+	else {
+		r = g = b = 0.f;
+	}
+
+	float factor;
+	if (is_range(380.f, 420.f, wl)) {
+		factor = 0.3f + 0.7f * (wl - 380.f) / (420.f - 380.f);
+	}
+	else if (is_range(420.f, 700.f, wl)) {
+		factor = 1.f;
+	}
+	else if (is_range(700, 780, wl)) {
+		factor = 0.3f + 0.7f * (780.f - wl) / (780.f - 700.f);
+	}
+	else {
+		factor = 0.f;
+	}
+
+	r = adjustment(r, factor, gamma);
+	g = adjustment(g, factor, gamma);
+	r = adjustment(b, factor, gamma);
 }

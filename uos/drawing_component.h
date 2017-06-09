@@ -12,13 +12,13 @@ protected:
 	Matrix4f mvp;
 
 	static s_Phong_light light;
-	GLuint loc_pos;
-	GLuint loc_col;
-	GLuint loc_st;
-	GLuint loc_normal;
+	GLint loc_pos;
+	GLint loc_col;
+	GLint loc_st;
+	GLint loc_normal;
 
-	shader_prog sprog;
-	vertices comp;
+	s_shader_prog sprog;
+	s_vertices comp;
 
 public:
 	c_draw_comp() {};

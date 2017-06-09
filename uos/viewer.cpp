@@ -28,7 +28,10 @@ const int win_height = 960;
 const char * texture_name = "golddiag.jpg";
 const float trans_step = 100.f;
 const float rot_step = 1.f;
-observer obsv;
+
+c_uos uos;
+s_observer obsv;
+s_Phong_light light;
 
 static void key_callback(GLFWwindow *wiindow, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
@@ -69,7 +72,12 @@ static void key_callback(GLFWwindow *wiindow, int key, int scancode, int action,
 	}
 }
 
+void cmd_receiver() {
+
+}
+
 int main(int argc, char ** argv) {
+	thread t(cmd_receiver);
 	GLFWwindow* window;
 
 	//glfwSetErrorCallback(error_callback);
@@ -100,17 +108,16 @@ int main(int argc, char ** argv) {
 	//glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	c_uos simulator;
-	if (!simulator.init())
+	if (!uos.init()) {
 		return false;
+	}
 
-	s_Phong_light light;
 	light.pos = Vector3f(500.f, 0.f, 1500.f);
 	light.col = Vector3f(1.f, 1.f, 1.f);
 	light.pwr = 10000000;
 	light.amb_light_pwr = Vector3f(0.5f, 0.5f, 0.5f);
 	light.spec_light_col = Vector3f(1.f, 1.f, 1.f);
-	simulator.set_light(light);
+	uos.set_light(light);
 
 	Mat texture = imread(texture_name);
 	if (texture.empty()) {
@@ -122,7 +129,7 @@ int main(int argc, char ** argv) {
 	obsv.up = Vector3f(0.f, 1.f, 0.f);
 
 	get_perspective(deg_to_rad(60.f), 640.f/ 480.f, 1000, 4500, obsv.proj);
-	simulator.set_proj(obsv.proj);
+	uos.set_proj(obsv.proj);
 
 	obsv.eye = Vector3f(0.f, 0.f, 3000.f);
 	obsv.update();
@@ -134,22 +141,23 @@ int main(int argc, char ** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 
-		simulator.set_view(obsv.view);
+		uos.set_view(obsv.view);
 
 		Matrix4f cube_model;
 		get_Sim3(1.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
-		simulator.set_cube_model(cube_model);
+		uos.set_cube_model(cube_model);
 		ang += 1.f;
 		
 		if (ang > 360) {
 			ang = 0.f;
 		}
 
-		simulator.draw();
+		uos.draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		Sleep(100);
 	}
 	glfwDestroyWindow(window);
 	glfwTerminate();
+	return true;
 }

@@ -4,6 +4,7 @@ uniform mat4 mvp;
 
 in vec3 pos_model;
 in vec3 col;
+
 out vec3 vertex_col;
 
 void main(){
