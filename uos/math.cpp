@@ -151,7 +151,7 @@ void calc_prim_normals(s_vertices vtxs) {
 	}	
 }
 
-void cocnvert_rgb_to_hsv(const float r, const float g, const float b,
+void convert_rgb_to_hsv(const float r, const float g, const float b,
 	float &h, float &s, float &v) {
 	float max_val = max(r, max(g, b));
 	float min_val = min(r, min(g, b));
@@ -171,12 +171,15 @@ void cocnvert_rgb_to_hsv(const float r, const float g, const float b,
 	}
 
 	h = 60 * h;
+	if (h < 0)
+		h += 360;
+
 	v = max_val;
 
 	if (abs(v) < FLT_EPSILON)
 		s = 0.f;
 	else
-		h = c / v;
+		s = c / v;
 }
 
 float adjustment(const float color, const float  factor, const float gamma) {

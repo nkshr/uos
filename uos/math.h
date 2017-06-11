@@ -53,6 +53,15 @@ inline float deg_to_rad(const float deg) {
 	return static_cast<float>(EIGEN_PI) * deg / 180.f;
 }
 
+void convert_rgb_to_hsv(const float r, const float g, const float b,
+	float &h, float &s, float &v);
 float adjustment(const float color, const float  factor, const float gamma);
 void convert_wavelength_to_rgb(const float gamma,
 	const float wl, float &r, float &g, float &b);
+void convert_wavelength_to_rgb(const float gamma,
+	const float wl, float &r, float &g, float &b);
+
+inline float map_val(const float max_val, const float min_val,
+	const float mmax_val, const float mmin_val, const float val) {
+	return (val - min_val) * (mmax_val - mmin_val) / (max_val - min_val) + mmin_val;
+}

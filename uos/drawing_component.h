@@ -20,6 +20,20 @@ protected:
 	s_shader_prog sprog;
 	s_vertices comp;
 
+	int num_vertices;
+	int num_prim_vertices;
+	int num_prims;
+	float *poss;
+	float *cols;
+	float *normals;
+	float *prim_normals;
+
+	enum e_dtype {
+		E_DTYPE_WIRE, E_DTYPE_FACE
+	};
+
+	e_dtype dtype;
+
 public:
 	c_draw_comp() {};
 	virtual bool init() = 0;
@@ -35,6 +49,11 @@ public:
 };
 
 class c_cube :public c_draw_comp{
+private:
+	GLuint absorp_buf_id;
+
+	GLint loc_atten_coef;
+	float *absorp_coefs;
 public:
 	c_cube();
 	virtual bool init();

@@ -15,10 +15,11 @@ using namespace Eigen;
 using namespace cv;
 
 #define NUM_CUBE_VERTICES 36
-#define CUBE_LEN 1500.f
-#define LIGHT_CUBE_LEN 200.f
-#define PLANE_LEN 10000.f
-#define PLANE_CELL_LEN 100.f
+#define CUBE_LEN 1.0f
+#define LIGHT_CUBE_LEN 0.1f
+#define PLANE_LEN 100.f
+#define PLANE_CELL_LEN 0.1f
+#define NUM_TRI_VERTICES 3;
 
 #include "util.h"
 #include "math.h"
@@ -45,9 +46,15 @@ void c_draw_comp::set_model(const Matrix4f &model) {
 	this->model = model;
 }
 
-c_cube::c_cube() {
+c_cube::c_cube(){
+	dtype = E_DTYPE_FACE;
 	strcpy(vsname, "cube.vs");
 	strcpy(fsname, "cube.fs");
+	num_vertices = NUM_CUBE_VERTICES;
+	
+	num_vertices = NUM_CUBE_VERTICES;
+	num_prim_vertices = NUM_TRI_VERTICES;
+	num_prims = num_vertices / num_prim_vertices;
 }
 
 bool c_cube::init() {
@@ -58,10 +65,11 @@ bool c_cube::init() {
 
 	if (!sprog.create_prog())
 		return false;
-
+	
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	loc_col = sprog.get_attrib_loc("col");
 	loc_normal = sprog.get_attrib_loc("normal_model");
+	loc_atten_coef = sprog.get_attrib_loc("atten_coef");
 
 	sprog.use();
 	comp.num_vertices = NUM_CUBE_VERTICES;
@@ -139,6 +147,25 @@ bool c_cube::init() {
 	glEnableVertexAttribArray(loc_normal);
 	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+	absorp_coefs = new float[comp.num_vertices];
+	for (int i = 0; i < comp.num_vertices; ++i) {
+		float h, s, v;
+		int j = i * 3;
+		convert_rgb_to_hsv(comp.cols[j], comp.cols[j + 1], comp.cols[j + 2], h, s, v);
+		float wl = 1180.f - map_val(360.f, 0.f, 780.f, 400.f, h);
+		absorp_coefs[i] = map_val(780.f, 400.f, 1.f, 0.01f, wl);
+		//cout << h << ", " << absorp_coefs[i] << endl;
+		//absorp_coefs[i] = 1.f;
+	}
+
+	glGenBuffers(1, &absorp_buf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, absorp_buf_id);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * num_vertices,
+		absorp_coefs, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(loc_atten_coef);
+	glVertexAttribPointer(loc_atten_coef, 1, GL_FLOAT, GL_FALSE, 0, 0);
 	return check_gl("c_cube::init");
 }
 
@@ -171,6 +198,7 @@ c_cube::~c_cube() {
 }
 
 c_light_cube::c_light_cube() {
+	dtype = E_DTYPE_FACE;
 	strcpy(vsname, "light_cube.vs");
 	strcpy(fsname, "light_cube.fs");
 }
@@ -216,7 +244,10 @@ void c_light_cube::draw() {
 
 	Matrix4f mvp = proj * view * light_model;
 	sprog.set_mat4("mvp", mvp.data());
-	glDrawArrays(GL_LINE_STRIP, 0, comp.num_vertices);
+	if (dtype == E_DTYPE_WIRE)
+		glDrawArrays(GL_LINE_STRIP, 0, comp.num_vertices);
+	else
+		glDrawArrays(GL_TRIANGLES, 0, comp.num_vertices);
 }
 
 void c_light_cube::destroy() {
