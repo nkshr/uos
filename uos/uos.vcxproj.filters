@@ -46,12 +46,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cube.vs">
-      <Filter>リソース ファイル</Filter>
-    </None>
-    <None Include="cube.fs">
-      <Filter>リソース ファイル</Filter>
-    </None>
     <None Include="line.vs">
       <Filter>リソース ファイル</Filter>
     </None>
@@ -65,6 +59,12 @@
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="line.fs">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="underwater.vs">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="underwater.fs">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>

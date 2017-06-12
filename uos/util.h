@@ -125,13 +125,18 @@ struct s_observer {
 };
 
 struct s_Phong_light {
+	bool bamb;
+	bool bdiffuse;
+	bool bspec;
+	bool batten;
+
 	float pwr;
 	Vector3f pos;
 	Vector3f col;
 	Vector3f amb_light_pwr;
 	Vector3f spec_light_col;
 
-	s_Phong_light(): pwr(1000), col(1.f, 1.f, 1.f),
+	s_Phong_light(): bamb(true), bdiffuse(true), bspec(true), batten(true), pwr(1000), col(1.f, 1.f, 1.f),
 		amb_light_pwr(0.3f, 0.3f, 0.3f), spec_light_col(1.f, 1.f, 1.f) {
 	};
 };

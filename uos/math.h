@@ -55,13 +55,31 @@ inline float deg_to_rad(const float deg) {
 
 void convert_rgb_to_hsv(const float r, const float g, const float b,
 	float &h, float &s, float &v);
+void convert_hsv_to_rgb(const float h, const float s, const float v,
+	float &r, float &g, float &b);
 float adjustment(const float color, const float  factor, const float gamma);
-void convert_wavelength_to_rgb(const float gamma,
-	const float wl, float &r, float &g, float &b);
 void convert_wavelength_to_rgb(const float gamma,
 	const float wl, float &r, float &g, float &b);
 
 inline float map_val(const float max_val, const float min_val,
 	const float mmax_val, const float mmin_val, const float val) {
 	return (val - min_val) * (mmax_val - mmin_val) / (max_val - min_val) + mmin_val;
+}
+
+float get_rand(const float max_val, const float min_val);
+
+inline float calc_absorp_coef(const float r, const float g, const float b) {
+	float h, s, v;
+	convert_rgb_to_hsv(r, g, b, h, s, v);
+	float wl = map_val(180.f, 0.f, 780.f, 400.f, abs(h - 180.f));
+	const float absorp_coef = map_val(780.f, 400.f, 1.f, 0.01f, wl);
+	cout << r << ", " << g << ", " << b << " :  " << h << " : " << absorp_coef << endl;
+	return absorp_coef;
+}
+
+inline float calc_absorp_coef(const float h) {
+	float wl = map_val(180.f, 0.f, 780.f, 400.f, abs(h - 180.f));
+	const float absorp_coef = map_val(780.f, 400.f, 1.f, 0.01f, wl);
+	//cout << h  << " : " << absorp_coef << endl;
+	return absorp_coef;
 }

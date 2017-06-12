@@ -27,22 +27,25 @@ c_uos::~c_uos() {
 }
 
 void c_uos::draw() {
-	cube.draw();
-	wire_cube.draw();
-	light_cube.draw();
-	wire_plane.draw();
+	//cube.draw();
+	//wire_cube.draw();
+	//light_cube.draw();
+	//wire_plane.draw();
+	grids.draw();
 }
 
 
 
 bool c_uos::init() {
-	if (!cube.init())
-		return false;
-	if (!wire_cube.init())
-		return false;
-	if (!light_cube.init())
-		return false;
-	if (!wire_plane.init())
+	//if (!cube.init())
+	//	return false;
+	//if (!wire_cube.init())
+	//	return false;
+	//if (!light_cube.init())
+	//	return false;
+	//if (!wire_plane.init())
+	//	return false;
+	if (!grids.init())
 		return false;
 
 	return true;
@@ -66,4 +69,8 @@ void c_uos::set_cube_model(const  Matrix4f &model) {
 
 void c_uos::set_light(const s_Phong_light &light) {
 	c_draw_comp::set_light(light);
+}
+
+void c_uos::set_grids_model(const Matrix4f &model) {
+	grids.set_model(model);
 }

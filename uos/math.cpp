@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <random>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -100,19 +101,21 @@ void get_Sim3(const float s, const float xang, const float yang, const float zan
 	get_Ry(yang, Ry);
 	get_Rz(zang, Rz);
 
+	float _s = 1.f + s;
 	Matrix4f m = Rz * Ry * Rx;
 	Sim3 <<
-		s * m(0, 0), m(0, 1), m(0, 2), x,
-		m(1, 0), s * m(1, 1), m(1, 2), y,
-		m(2, 0), m(2, 1), s * m(2, 2), z,
+		_s * m(0, 0), m(0, 1), m(0, 2), x,
+		m(1, 0), _s * m(1, 1), m(1, 2), y,
+		m(2, 0), m(2, 1), _s * m(2, 2), z,
 		0.f, 0.f, 0.f, 1.f;
 }
 
 void get_Sim3(const float s, const Matrix3f& R, const Vector3f& t, Matrix4f &Sim3) {
+	float _s = 1.f + s;
 	Sim3 <<
-		s * R(0, 0), R(0, 1), R(0, 2), t(0),
-		R(1, 0), s * R(1, 1), R(1, 2), t(1),
-		R(2, 0), R(2, 1), s * R(2, 2), t(2),
+		_s * R(0, 0), R(0, 1), R(0, 2), t(0),
+		R(1, 0), _s * R(1, 1), R(1, 2), t(1),
+		R(2, 0), R(2, 1), _s * R(2, 2), t(2),
 		0.f, 0.f, 0.f, 1.f;
 }
 
@@ -153,8 +156,8 @@ void calc_prim_normals(s_vertices vtxs) {
 
 void convert_rgb_to_hsv(const float r, const float g, const float b,
 	float &h, float &s, float &v) {
-	float max_val = max(r, max(g, b));
-	float min_val = min(r, min(g, b));
+	const float max_val = max(r, max(g, b));
+	const float min_val = min(r, min(g, b));
 	float c = max_val - min_val;
 
 	h = 0.f;
@@ -163,7 +166,7 @@ void convert_rgb_to_hsv(const float r, const float g, const float b,
 	else if (max_val == r) {
 		h = fmod((g - b) / c, 6.f);
 	}
-	else if (max_val = g) {
+	else if (max_val == g) {
 		h = (b - r) / c + 2;
 	}
 	else {
@@ -180,6 +183,47 @@ void convert_rgb_to_hsv(const float r, const float g, const float b,
 		s = 0.f;
 	else
 		s = c / v;
+}
+
+void convert_hsv_to_rgb(const float h, const float s, const float v,
+	float &r, float &g, float &b) {
+	const float c = s * v;
+	const float _h = h / 60.f;
+	const float x = c * (1 - abs(fmod(_h, 2.f) - 1.f));
+	if (is_range(0.f, 1.f, _h)) {
+		r = c;
+		g = x;
+		b = 0.f;
+	}
+	else if (is_range(1.f, 2.f, _h)) {
+		r = x;
+		g = c;
+		b = 0.f;
+	}
+	else if (is_range(2.f, 3.f, _h)) {
+		r = 0.f;
+		g = c;
+		b = x;
+	}
+	else if (is_range(3.f, 4.f, _h)) {
+		r = 0.f;
+		g = x;
+		b = c;
+	}
+	else if (is_range(4.f, 5.f, _h)) {
+		r = x;
+		g = 0.f;
+		b = c;
+	}
+	else if (is_range(5.f, 6.f, _h)) {
+		r = c;
+		g = 0.f;
+		b = x;
+	}
+	const float m = v - c;
+	r += m;
+	g += m;
+	b += m;
 }
 
 float adjustment(const float color, const float  factor, const float gamma) {
@@ -244,4 +288,11 @@ void convert_wavelength_to_rgb(const float gamma,
 	r = adjustment(r, factor, gamma);
 	g = adjustment(g, factor, gamma);
 	r = adjustment(b, factor, gamma);
+}
+
+float get_rand(const float max_val, const float min_val) {
+	static default_random_engine generator(static_cast<uint>(time(NULL)));
+	uniform_real_distribution<float> distribution(0.f, 1.f);
+	return distribution(generator);
+	
 }

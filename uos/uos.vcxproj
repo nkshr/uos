@@ -133,8 +133,8 @@
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cube.fs" />
-    <None Include="cube.vs" />
+    <None Include="underwater.fs" />
+    <None Include="underwater.vs" />
     <None Include="light_cube.fs" />
     <None Include="light_cube.vs" />
     <None Include="line.fs" />
