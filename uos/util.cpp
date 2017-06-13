@@ -35,10 +35,10 @@ char * load_text(const char *fname) {
 	return txt;
 }
 
-s_shader_prog::s_shader_prog() :vs(0), gs(0), fs(0){
+c_shader_prog::c_shader_prog() :vs(0), gs(0), fs(0){
 }
 
-bool s_shader_prog::create_prog() {
+bool c_shader_prog::create_prog() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
@@ -75,7 +75,7 @@ bool s_shader_prog::create_prog() {
 }
 
 
-void s_shader_prog::destroy() {
+void c_shader_prog::destroy() {
 	glDetachShader(program, vs);
 	glDetachShader(program, fs);
 	glDetachShader(program, gs);
@@ -88,35 +88,35 @@ void s_shader_prog::destroy() {
 	glDeleteVertexArrays(1, &vao);
 }
 
-s_shader_prog::~s_shader_prog() {
+c_shader_prog::~c_shader_prog() {
 	destroy();
 }
 
-int s_shader_prog::get_attrib_loc(const char *param) {
+int c_shader_prog::get_attrib_loc(const char *param) {
 	return glGetAttribLocation(program, param);
 }
 
-void s_shader_prog::set_vec3(const char *param, const float v0, const float v1, const float v2) {
+void c_shader_prog::set_vec3(const char *param, const float v0, const float v1, const float v2) {
 	GLuint loc =  glGetUniformLocation(program, param);
 	glUniform3f(loc, v0, v1, v2);
 }
 
-void s_shader_prog::set_val(const char *param, const float val) {
+void c_shader_prog::set_val(const char *param, const float val) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniform1f(loc, val);
 }
 
-void s_shader_prog::set_mat4(const char *param, const float *data) {
+void c_shader_prog::set_mat4(const char *param, const float *data) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
 }
 
-void s_shader_prog::use() {
+void c_shader_prog::use() {
 	glBindVertexArray(vao);
 	glUseProgram(program);
 }
 
-bool s_shader_prog::create_shader(const char * fname, GLenum stype) {
+bool c_shader_prog::create_shader(const char * fname, GLenum stype) {
 	char *ssrc = load_text(fname);
 	if (!ssrc) {
 		cerr << "Error : Couldn't open " << fname << "." << endl;
@@ -159,6 +159,23 @@ bool s_shader_prog::create_shader(const char * fname, GLenum stype) {
 		break;
 	}
 	return static_cast<bool>(shader);
+}
+
+c_underwater_sprog::c_underwater_sprog() {
+	strcpy(vsname, "underwater.vs");
+	strcpy(fsname, "underwater.fs");
+}
+
+c_underwater_sprog::~c_underwater_sprog() {
+}
+
+bool c_underwater_sprog::init() {
+	loc_pos = get_attrib_loc("pos_model");
+	loc_col = get_attrib_loc("col");
+	loc_normal = get_attrib_loc("normal_model");
+	loc_atten_coef = get_attrib_loc("atten_coef");
+
+	return check_gl("c_underwater_sprog::init");
 }
 
 bool check_gl(const char *place) {

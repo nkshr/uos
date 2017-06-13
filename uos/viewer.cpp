@@ -23,7 +23,7 @@ using namespace cv;
 #include "util.h"
 #include "math.h"
 #include "drawing_component.h"
-#include "uos.h"
+
 
 const int win_width = 1280;
 const int win_height = 960;
@@ -31,7 +31,7 @@ const char * texture_name = "golddiag.jpg";
 const float trans_step = 0.1f;
 const float rot_step = 1.f;
 
-bool bdraw_cube = false;
+bool bdraw_cube = true;
 bool bdraw_light_cube = true;
 bool bdraw_wire_plane = true;
 bool bdraw_grids = true;
@@ -123,30 +123,30 @@ void cmd_receiver(GLFWwindow *window) {
 				if (strcmp(*it_toks, "draw_cube") == 0) {
 					if (++it_toks == toks.end())
 						break;
-					if (strcmp(*it_toks, "y")) {
+					if (strcmp(*it_toks, "y") == 0) {
 						bdraw_cube = true;
 					}
-					else if( strcmp(*it_toks, "n")){
+					else if( strcmp(*it_toks, "n") == 0){
 						bdraw_cube = false;
 					}
 				}
 				else if (strcmp(*it_toks, "draw_light_cube") == 0) {
 					if (++it_toks == toks.end())
 						break;
-					if (strcmp(*it_toks, "y")) {
+					if (strcmp(*it_toks, "y") == 0) {
 						bdraw_light_cube = true;
 					}
-					else if (strcmp(*it_toks, "n")) {
+					else if (strcmp(*it_toks, "n") == 0) {
 						bdraw_light_cube = false;
 					}
 				}
 				else if (strcmp(*it_toks, "draw_grids") == 0) {
 					if (++it_toks == toks.end())
 						break;
-					if (strcmp(*it_toks, "y")) {
+					if (strcmp(*it_toks, "y") == 0) {
 						bdraw_grids = true;
 					}
-					else if (strcmp(*it_toks, "n")) {
+					else if (strcmp(*it_toks, "n") == 0) {
 						bdraw_grids = false;
 					}
 				}
@@ -316,7 +316,7 @@ int main(int argc, char ** argv) {
 	glCullFace(GL_BACK);
 
 	//initialization
-	c_cube cube;
+	c_underwater_cube cube;
 	if (!cube.init())
 		return false;
 
@@ -333,7 +333,7 @@ int main(int argc, char ** argv) {
 		return false;
 
 
-	light.pos = Vector3f(1.f, 1.f, 1.f);
+	light.pos = Vector3f(0.f, 0.f, 1.f);
 	light.col = Vector3f(1.f, 1.f, 1.f);
 	light.pwr = 2;
 	light.amb_light_pwr = Vector3f(0.2f, 0.2f, 0.2f);

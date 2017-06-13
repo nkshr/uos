@@ -22,8 +22,7 @@ protected:
 	GLuint ibuf_id;
 	GLuint nbuf_id;
 
-	s_shader_prog sprog;
-	s_vertices comp;
+	c_shader_prog sprog;
 
 	int num_vertices;
 	int num_prim_vertices;
@@ -32,9 +31,11 @@ protected:
 	float *cols;
 	float *normals;
 	float *prim_normals;
+	int *indices;
 
 	int prim_type;
 
+	void calc_prim_normals();
 public:
 	//c_draw_comp() {};
 	virtual bool init() = 0;
@@ -65,22 +66,15 @@ public:
 	~c_underwater_comp();
 };
 
-class c_cube :public c_underwater_comp{
+class c_underwater_cube :public c_underwater_comp{
 private:
 
 public:
-	c_cube();
+	c_underwater_cube();
 	virtual bool init();
 	virtual void draw();
 	virtual void destroy();
-	~c_cube();
-
-	//void enable_atten(const bool enbl);
-	//void enable_amb_light(const bool enbl);
-	//void enable_diffuse_light(const bool enbl);
-	//void enable_spec_light(const bool enbl);
-
-
+	~c_underwater_cube();
 };
 
 class c_light_cube :public c_draw_comp {

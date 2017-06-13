@@ -15,23 +15,23 @@ void get_Sim3(const float s, const float xang, const float yang, const float zan
 	const float x, const float y, const float z, Matrix4f &Sim3);
 void get_SE3_inv(const float xang, const float yang, const float zang, const float x, const float y, const float z, Matrix4f &SE3);
 
-struct s_vertices{
-	float *tposs;
-	float *poss;
-	float *normals;
-	float *prim_normals;
-	float *cols;
-	uint *indices;
-	int num_vertices;
-	int num_prims;
+//struct s_vertices{
+//	float *tposs;
+//	float *poss;
+//	float *normals;
+//	float *prim_normals;
+//	float *cols;
+//	uint *indices;
+//	int num_vertices;
+//	int num_prims;
+//
+//	GLuint vbuf_id;
+//	GLuint cbuf_id;
+//	GLuint ibuf_id;
+//	GLuint nbuf_id;
+//};
 
-	GLuint vbuf_id;
-	GLuint cbuf_id;
-	GLuint ibuf_id;
-	GLuint nbuf_id;
-};
-
-void calc_prim_normals(s_vertices vtxs);
+//void calc_prim_normals(s_vertices vtxs);
 
 inline void cross(const float a0, const float a1, const float a2,
 	const float b0, const float b1, const float b2,
