@@ -136,24 +136,6 @@ void get_SE3_inv(const float xang, const float yang, const float zang, const flo
 		0.f, 0.f, 0.f, 1.f;
 }
 
-void calc_prim_normals(s_vertices vtxs) {
-	for (int i = 0; i < vtxs.num_prims; ++i) {
-		int j = i * 3;
-		uint *indices = &vtxs.indices[j];
-		const int ipos0 = indices[0] * 3;
-		float *pos0 = &vtxs.poss[ipos0];
-		const int ipos1 = indices[1] * 3;
-		float *pos1 = &vtxs.poss[ipos1];
-		const int ipos2 = indices[2] * 3;
-		float *pos2 = &vtxs.poss[ipos2];
-	
-		cross(pos2[0] - pos0[0], pos2[1] - pos0[1], pos2[2] - pos0[2], 
-			pos1[0] - pos0[0], pos1[1] - pos0[1], pos1[2] - pos0[2],
-			vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
-		normalize(vtxs.prim_normals[j], vtxs.prim_normals[j + 1], vtxs.prim_normals[j + 2]);
-	}	
-}
-
 void convert_rgb_to_hsv(const float r, const float g, const float b,
 	float &h, float &s, float &v) {
 	const float max_val = max(r, max(g, b));

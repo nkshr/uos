@@ -122,14 +122,12 @@
   <ItemGroup>
     <ClCompile Include="drawing_component.cpp" />
     <ClCompile Include="math.cpp" />
-    <ClCompile Include="uos.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawing_component.h" />
     <ClInclude Include="math.h" />
-    <ClInclude Include="uos.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>

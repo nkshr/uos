@@ -1,8 +1,8 @@
 #pragma once
-class s_shader_prog {
+class c_shader_prog {
 public:
-	s_shader_prog();
-	~s_shader_prog();
+	c_shader_prog();
+	~c_shader_prog();
 
 	bool create_shader(const char *fname, GLenum stype);
 	bool create_prog();
@@ -15,12 +15,31 @@ public:
 	void set_val(const char *param, const float val);
 	void set_mat4(const char *param, const float *data);
 
-private:
+	virtual bool init() { return true; }
+
+protected:
 	GLuint vs;
 	GLuint gs;
 	GLuint fs;
 	GLuint program;
 	GLuint vao;
+
+	GLint loc_pos;
+	GLint loc_col;
+	GLint loc_st;
+	GLint loc_normal;
+	GLint loc_atten_coef;
+	char *vsname;
+	char *gsname;
+	char *fsname;
+};
+
+class c_underwater_sprog : public c_shader_prog {
+public:
+	c_underwater_sprog();
+	~c_underwater_sprog();
+
+	virtual bool init();
 };
 bool check_gl(const char *place);
 void set_cube_vertices(const float length, float *buf);

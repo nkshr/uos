@@ -50,6 +50,24 @@ void c_draw_comp::set_model(const Matrix4f &model) {
 	this->model = model;
 }
 
+void c_draw_comp::calc_prim_normals() {
+	for (int i = 0; i < num_prims; ++i) {
+		int j = i * 3;
+		int *_indices = &indices[j];
+		const int ipos0 = _indices[0] * 3;
+		float *pos0 = &poss[ipos0];
+		const int ipos1 = _indices[1] * 3;
+		float *pos1 = &poss[ipos1];
+		const int ipos2 = _indices[2] * 3;
+		float *pos2 = &poss[ipos2];
+
+		cross(pos2[0] - pos0[0], pos2[1] - pos0[1], pos2[2] - pos0[2],
+			pos1[0] - pos0[0], pos1[1] - pos0[1], pos1[2] - pos0[2],
+			prim_normals[j], prim_normals[j + 1], prim_normals[j + 2]);
+		normalize(prim_normals[j], prim_normals[j + 1], prim_normals[j + 2]);
+	}
+}
+
 c_underwater_comp::c_underwater_comp(){
 	strcpy(vsname, "underwater.vs");
 	strcpy(fsname, "underwater.fs");
@@ -98,36 +116,36 @@ void c_underwater_comp::draw() {
 c_underwater_comp::~c_underwater_comp() {
 }
 
-c_cube::c_cube():c_underwater_comp()
+c_underwater_cube::c_underwater_cube():c_underwater_comp()
 {	
 	num_vertices = NUM_CUBE_VERTICES;
 	num_prim_vertices = NUM_TRI_VERTICES;
 	num_prims = num_vertices / num_prim_vertices;
 }
 
-bool c_cube::init() {
+bool c_underwater_cube::init() {
 	if (!c_underwater_comp::init())
 		return false;
 
-	comp.num_vertices = NUM_CUBE_VERTICES;
-	comp.num_prims = NUM_CUBE_VERTICES / 3;
-	comp.poss = new  float[comp.num_vertices * 3];
-	set_cube_vertices(CUBE_LEN, comp.poss);
+	num_vertices = NUM_CUBE_VERTICES;
+	num_prims = NUM_CUBE_VERTICES / 3;
+	poss = new  float[num_vertices * 3];
+	set_cube_vertices(CUBE_LEN, poss);
 
-	glGenBuffers(1, &comp.vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.poss, GL_STATIC_DRAW);
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_pos);
 	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	comp.indices = new uint[comp.num_vertices];
-	for (int i = 0; i < comp.num_vertices; ++i) {
-		comp.indices[i] = i;
+	indices = new int[num_vertices];
+	for (int i = 0; i < num_vertices; ++i) {
+		indices[i] = i;
 	}
 
-	comp.cols = new float[comp.num_vertices * 3];
-	set_vec3(1.f, 0.f, 0.f, comp.cols);
+	cols = new float[num_vertices * 3];
+	set_vec3(1.f, 0.f, 0.f, cols);
 	for (int i = 1; i < 6; ++i) {
 		set_vec3(1.f, 0.f, 0.f, NULL);
 	}
@@ -152,39 +170,39 @@ bool c_cube::init() {
 		set_vec3(0.f, 1.f, 1.f, NULL);
 	}
 
-	glGenBuffers(1, &comp.cbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.cbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.cols, GL_STATIC_DRAW);
+	glGenBuffers(1, &cbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		cols, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_col);
 	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	comp.prim_normals = new float[comp.num_prims * 3];
-	calc_prim_normals(comp);
+	prim_normals = new float[num_prims * 3];
+	calc_prim_normals();
 
-	comp.normals = new float[comp.num_vertices * 3];
-	for (int i = 0; i < comp.num_prims; ++i) {
+	normals = new float[num_vertices * 3];
+	for (int i = 0; i < num_prims; ++i) {
 		int j = i * 3;
 		int k = i * 9;
 
 		for (int l = 0; l < 3; ++l) {
-			comp.normals[k++] = comp.prim_normals[j];
-			comp.normals[k++] = comp.prim_normals[j + 1];
-			comp.normals[k++] = comp.prim_normals[j + 2];
+			normals[k++] = prim_normals[j];
+			normals[k++] = prim_normals[j + 1];
+			normals[k++] = prim_normals[j + 2];
 		}
 	}
 
-	glGenBuffers(1, &comp.nbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.nbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.normals, GL_STATIC_DRAW);
+	glGenBuffers(1, &nbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, nbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		normals, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_normal);
 	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	for (int i = 0; i < comp.num_vertices; ++i) {
+	for (int i = 0; i < num_vertices; ++i) {
 		float h, s, v;
 		int j = i * 3;
-		convert_rgb_to_hsv(comp.cols[j], comp.cols[j + 1], comp.cols[j + 2], h, s, v);
+		convert_rgb_to_hsv(cols[j], cols[j + 1], cols[j + 2], h, s, v);
 		float wl = 1180.f - map_val(360.f, 0.f, 780.f, 400.f, h);
 		absorp_coefs[i] = map_val(780.f, 400.f, 1.f, 0.01f, wl);
 		//cout << h << ", " << absorp_coefs[i] << endl;
@@ -199,35 +217,25 @@ bool c_cube::init() {
 
 	glEnableVertexAttribArray(loc_atten_coef);
 	glVertexAttribPointer(loc_atten_coef, 1, GL_FLOAT, GL_FALSE, 0, 0);
-	return check_gl("c_cube::init");
+	return check_gl("c_underwater_cube::init");
 }
 
-void c_cube::draw() {
-	//sprog.use();
-	//sprog.set_mat4("model", model.data());
-	//sprog.set_mat4("view", view.data());
-	//sprog.set_mat4("proj", proj.data());
-	//sprog.set_vec3("light_pos_world", light.pos(0), light.pos(1), light.pos(2));
-	//sprog.set_vec3("light_col", light.col(0), light.col(1), light.col(2));
-	//sprog.set_vec3("amb_light_pwr", light.amb_light_pwr(0), light.amb_light_pwr(1), light.amb_light_pwr(2));
-	//sprog.set_vec3("spec_light_col", light.spec_light_col(0), light.spec_light_col(1), light.spec_light_col(2));
-	//sprog.set_val("light_pwr", light.pwr);
-
+void c_underwater_cube::draw() {
 	c_underwater_comp::draw();
-	glDrawArrays(GL_TRIANGLES, 0, comp.num_vertices);
+	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 }
 
-void c_cube::destroy() {
-	glDeleteBuffers(1, &comp.vbuf_id);
-	glDeleteBuffers(1, &comp.cbuf_id);
-	glDeleteBuffers(1, &comp.ibuf_id);
-	delete comp.poss;
-	delete comp.cols;
-	delete comp.normals;
-	delete comp.prim_normals;
+void c_underwater_cube::destroy() {
+	glDeleteBuffers(1, &vbuf_id);
+	glDeleteBuffers(1, &cbuf_id);
+	glDeleteBuffers(1, &ibuf_id);
+	delete poss;
+	delete cols;
+	delete normals;
+	delete prim_normals;
 }
 
-c_cube::~c_cube() {
+c_underwater_cube::~c_underwater_cube() {
 	destroy();
 }
 
@@ -249,19 +257,18 @@ bool c_light_cube::init() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	sprog.use();
 
-	comp.num_vertices = NUM_CUBE_VERTICES;
-	comp.num_prims = NUM_CUBE_VERTICES / 3;
-	comp.poss = new float[comp.num_vertices * 3];
-	set_cube_vertices(LIGHT_CUBE_LEN, comp.poss);
+	num_vertices = NUM_CUBE_VERTICES;
+	num_prims = NUM_CUBE_VERTICES / 3;
+	poss = new float[num_vertices * 3];
+	set_cube_vertices(LIGHT_CUBE_LEN, poss);
 
-	glGenBuffers(1, &comp.vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.poss, GL_STATIC_DRAW);
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_pos);
 	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	comp.indices = new uint[comp.num_vertices];
 	return check_gl("c_light_cube::init");
 }
 
@@ -279,16 +286,16 @@ void c_light_cube::draw() {
 	Matrix4f mvp = proj * view * light_model;
 	sprog.set_mat4("mvp", mvp.data());
 	if (prim_type == GL_LINES)
-		glDrawArrays(GL_LINE_STRIP, 0, comp.num_vertices);
+		glDrawArrays(GL_LINE_STRIP, 0, num_vertices);
 	else
-		glDrawArrays(GL_TRIANGLES, 0, comp.num_vertices);
+		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 }
 
 void c_light_cube::destroy() {
-	glDeleteBuffers(1, &comp.vbuf_id);
-	glDeleteBuffers(1, &comp.cbuf_id);
-	glDeleteBuffers(1, &comp.ibuf_id);
-	delete comp.poss;
+	glDeleteBuffers(1, &vbuf_id);
+	glDeleteBuffers(1, &cbuf_id);
+	glDeleteBuffers(1, &ibuf_id);
+	delete poss;
 }
 
 c_light_cube::~c_light_cube() {
@@ -316,25 +323,25 @@ bool c_wire_cube::init() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	loc_col = sprog.get_attrib_loc("col");
 
-	comp.num_vertices = NUM_CUBE_VERTICES;
-	comp.num_prims = NUM_CUBE_VERTICES / 3;
-	comp.poss = new  float[comp.num_vertices * 3];
-	set_cube_vertices(CUBE_LEN, comp.poss);
+	num_vertices = NUM_CUBE_VERTICES;
+	num_prims = NUM_CUBE_VERTICES / 3;
+	poss = new  float[num_vertices * 3];
+	set_cube_vertices(CUBE_LEN, poss);
 
-	glGenBuffers(1, &comp.vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.poss, GL_STATIC_DRAW);
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_pos);
 	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	comp.cols = new float[comp.num_vertices * 3];
-	for (int i = 0; i < comp.num_vertices * 3; ++i)
-		comp.cols[i] = 1.f;
-	glGenBuffers(1, &comp.cbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.cbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.cols, GL_STATIC_DRAW);
+	cols = new float[num_vertices * 3];
+	for (int i = 0; i < num_vertices * 3; ++i)
+		cols[i] = 1.f;
+	glGenBuffers(1, &cbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		cols, GL_STATIC_DRAW);
 	
 	glEnableVertexAttribArray(loc_col);
 	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -346,15 +353,15 @@ void c_wire_cube::draw() {
 	Matrix4f mvp = proj * view * model;
 	sprog.set_mat4("mvp", mvp.data());
 	//glDrawElements(GL_LINE_STRIP, 36, GL_UNSIGNED_INT, 0);
-	glDrawArrays(GL_LINE_STRIP, 0, comp.num_vertices);
+	glDrawArrays(GL_LINE_STRIP, 0, num_vertices);
 }
 
 void c_wire_cube::destroy() {
-	glDeleteBuffers(1, &comp.vbuf_id);
-	glDeleteBuffers(1, &comp.cbuf_id);
-	glDeleteBuffers(1, &comp.ibuf_id);
-	delete comp.poss;
-	delete comp.cols;
+	glDeleteBuffers(1, &vbuf_id);
+	glDeleteBuffers(1, &cbuf_id);
+	glDeleteBuffers(1, &ibuf_id);
+	delete poss;
+	delete cols;
 }
 
 c_wire_cube::~c_wire_cube() {
@@ -384,55 +391,55 @@ bool c_wire_plane::init() {
 
 	const float half_len = PLANE_LEN * 0.5f;
 	const float cell_len = PLANE_CELL_LEN;
-	comp.num_vertices = 4 * static_cast<int>(PLANE_LEN / PLANE_CELL_LEN);
-	comp.num_prims = comp.num_vertices / 2;
-	comp.poss = new float[comp.num_vertices * 3];
-	for (int i = 0; i < comp.num_vertices/2; ++i) {
+	num_vertices = 4 * static_cast<int>(PLANE_LEN / PLANE_CELL_LEN);
+	num_prims = num_vertices / 2;
+	poss = new float[num_vertices * 3];
+	for (int i = 0; i < num_vertices/2; ++i) {
 		const int j = i * 3;
 		const int k = i / 2;
 		if (i % 2 == 0) {
-			comp.poss[j] = half_len;
-			comp.poss[j + 1] = 0.f;
-			comp.poss[j + 2] = k * cell_len - half_len;
+			poss[j] = half_len;
+			poss[j + 1] = 0.f;
+			poss[j + 2] = k * cell_len - half_len;
 		}
 		else {
-			comp.poss[j] = -half_len;
-			comp.poss[j + 1] = 0.f;
-			comp.poss[j + 2] = k * cell_len - half_len;
+			poss[j] = -half_len;
+			poss[j + 1] = 0.f;
+			poss[j + 2] = k * cell_len - half_len;
 		}
 	}
 
-	for (int i = comp.num_vertices / 2; i < comp.num_vertices; ++i) {
+	for (int i = num_vertices / 2; i < num_vertices; ++i) {
 		const int j = i * 3;
-		const int k = i / 2 - comp.num_vertices / 4;
+		const int k = i / 2 - num_vertices / 4;
 		if (i % 2 == 0) {
-			comp.poss[j] = k * cell_len - half_len;
-			comp.poss[j + 1] = 0.f;
-			comp.poss[j + 2] = half_len;
+			poss[j] = k * cell_len - half_len;
+			poss[j + 1] = 0.f;
+			poss[j + 2] = half_len;
 		}
 		else {
-			comp.poss[j] = k * cell_len - half_len;
-			comp.poss[j + 1] = 0.f;
-			comp.poss[j + 2] = -half_len;
+			poss[j] = k * cell_len - half_len;
+			poss[j + 1] = 0.f;
+			poss[j + 2] = -half_len;
 		}
 	}
 
-	glGenBuffers(1, &comp.vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.poss, GL_STATIC_DRAW);
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_pos);
 	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	comp.cols = new float[comp.num_vertices * 3];
-	for (int i = 0; i < comp.num_vertices * 3; ++i) {
-		comp.cols[i] = 1.f;
+	cols = new float[num_vertices * 3];
+	for (int i = 0; i < num_vertices * 3; ++i) {
+		cols[i] = 1.f;
 	}
 
-	glGenBuffers(1, &comp.cbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, comp.cbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * comp.num_vertices,
-		comp.cols, GL_STATIC_DRAW);
+	glGenBuffers(1, &cbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		cols, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_col);
 
 	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -443,14 +450,14 @@ void c_wire_plane::draw() {
 	sprog.use();
 	Matrix4f mvp = proj * view;
 	sprog.set_mat4("mvp", mvp.data());
-	glDrawArrays(GL_LINES, 0, comp.num_vertices);
+	glDrawArrays(GL_LINES, 0, num_vertices);
 }
 
 void c_wire_plane::destroy() {
-	glDeleteBuffers(1, &comp.vbuf_id);
-	glDeleteBuffers(1, &comp.cbuf_id);
-	delete comp.poss;
-	delete comp.cols;
+	glDeleteBuffers(1, &vbuf_id);
+	glDeleteBuffers(1, &cbuf_id);
+	delete poss;
+	delete cols;
 };
 
 c_wire_plane::~c_wire_plane() {
