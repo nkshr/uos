@@ -106,20 +106,6 @@ c_cube::c_cube():c_underwater_comp()
 }
 
 bool c_cube::init() {
-	//if (!sprog.create_shader(vsname, GL_VERTEX_SHADER))
-	//	return false;
-	//if (!sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
-	//	return false;
-
-	//if (!sprog.create_prog())
-	//	return false;
-	//
-	//loc_pos = sprog.get_attrib_loc("pos_model");
-	//loc_col = sprog.get_attrib_loc("col");
-	//loc_normal = sprog.get_attrib_loc("normal_model");
-	//loc_atten_coef = sprog.get_attrib_loc("atten_coef");
-
-	//sprog.use();
 	if (!c_underwater_comp::init())
 		return false;
 
@@ -572,16 +558,6 @@ bool c_underwater_grids::init() {
 }
 
 void c_underwater_grids::draw() {
-	//sprog.use();
-	//sprog.set_mat4("model", model.data());
-	//sprog.set_mat4("view", view.data());
-	//sprog.set_mat4("proj", proj.data());
-	//sprog.set_vec3("light_pos_world", light.pos(0), light.pos(1), light.pos(2));
-	//sprog.set_vec3("light_col", light.col(0), light.col(1), light.col(2));
-	//sprog.set_vec3("amb_light_pwr", light.amb_light_pwr(0), light.amb_light_pwr(1), light.amb_light_pwr(2));
-	//sprog.set_vec3("spec_light_col", light.spec_light_col(0), light.spec_light_col(1), light.spec_light_col(2));
-	//sprog.set_val("light_pwr", light.pwr);
-
 	c_underwater_comp::draw();
 	glDrawArrays(GL_QUADS, 0, num_vertices);
 }

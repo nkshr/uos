@@ -38,8 +38,6 @@ void main(){
 		atten = 1.f;
 	float cos_alpha = clamp(dot(r, e), 0.f, 1.f);
 	vec3 amb_col = amb_light_pwr * vertex_col;
-	//vec3 frag_col = amb_col+ cos_theta * vertex_col * light_col * light_pos_world * atten
-	//+ spec_light_col * light_col * light_pwr * pow(cos_alpha, 5.f) * atten;
 	
 	vec3 frag_col = vec3(0);
 	if(bamb)
