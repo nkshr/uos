@@ -1,9 +1,12 @@
 #pragma once
 class c_draw_comp {
 protected:
-	char vsname[1026];
-	char gsname[1026];
-	char fsname[1026];
+	char *vsname;
+	char *tcsname;
+	char *tesname;
+	char *gsname;
+	char *fsname;
+	char *csname;
 	
 	Matrix4f model;
 	static Matrix4f view;
@@ -36,18 +39,21 @@ protected:
 	int prim_type;
 
 	void calc_prim_normals();
+	virtual bool set_buffers() = 0;
+	virtual bool set_uniforms() = 0;
+	virtual bool get_attrib_locs() = 0;
+	virtual void gen_buffers() = 0;
+
 public:
-	//c_draw_comp() {};
-	virtual bool init() = 0;
+	bool init();
 	virtual void draw() = 0;
-	virtual void destroy() = 0;
-	//~c_draw_comp() {};
 
 	static void set_view(const Matrix4f &view);
 	static void set_proj(const Matrix4f &proj);
 	static void set_light(const s_Phong_light &light);
 
 	void set_model(const Matrix4f &model);
+	virtual ~c_draw_comp();
 };
 
 class c_underwater_comp : public c_draw_comp {
@@ -59,62 +65,61 @@ protected:
 	float *atten_coefs;
 	float *absorp_coefs;
 
+	virtual bool set_uniforms();
+	virtual bool get_attrib_locs();
+	
 public:
 	c_underwater_comp();
-	virtual bool init();
-	virtual void draw();
-	~c_underwater_comp();
+	virtual ~c_underwater_comp();
 };
 
 class c_underwater_cube :public c_underwater_comp{
-private:
+protected:
+	virtual bool set_buffers();
+	virtual void gen_buffers();
 
 public:
 	c_underwater_cube();
-	virtual bool init();
 	virtual void draw();
-	virtual void destroy();
-	~c_underwater_cube();
 };
 
 class c_light_cube :public c_draw_comp {
+protected:
+	virtual bool set_uniforms();
+	virtual bool get_attrib_locs();
+	virtual void gen_buffers();
+	virtual bool set_buffers();
+
 public:
 	c_light_cube();
-	virtual bool init();
 	virtual void draw();
-	virtual void destroy();
-	~c_light_cube();
+	virtual ~c_light_cube();
 };
 
-
-class c_wire_cube : public c_draw_comp{
-public:
-	c_wire_cube();
-	virtual bool init();
-	virtual void draw();
-	virtual void destroy();
-	~c_wire_cube();
-};
 
 class c_wire_plane: public c_draw_comp {
+protected:
+	virtual bool set_uniforms();
+	virtual bool get_attrib_locs();
+	virtual void gen_buffers();
+	virtual bool set_buffers();
+
 public:
 	c_wire_plane();
-	virtual bool init();
 	virtual void draw();
-	virtual void destroy();
-	~c_wire_plane();
+	virtual ~c_wire_plane();
 };
 
 class c_underwater_grids : public c_underwater_comp{
-private:
+protected:
 	int num_grids_along_x;
 	int num_grids_along_y;
-	//float atten_coef;
+
+	virtual void gen_buffers();
+	virtual bool set_buffers();
 
 public:
 	c_underwater_grids();
-	virtual bool init();
 	virtual void draw();
-	virtual void destroy();
 	~c_underwater_grids();
 };

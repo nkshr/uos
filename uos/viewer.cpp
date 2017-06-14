@@ -333,7 +333,7 @@ int main(int argc, char ** argv) {
 		return false;
 
 
-	light.pos = Vector3f(0.f, 0.f, 1.f);
+	light.pos = Vector3f(1.f, 1.f, 1.f);
 	light.col = Vector3f(1.f, 1.f, 1.f);
 	light.pwr = 2;
 	light.amb_light_pwr = Vector3f(0.2f, 0.2f, 0.2f);

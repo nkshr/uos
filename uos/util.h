@@ -15,12 +15,16 @@ public:
 	void set_val(const char *param, const float val);
 	void set_mat4(const char *param, const float *data);
 
-	virtual bool init() { return true; }
+	bool init(const char *vsname, const char *tcsname, const char *tesname,
+		const char *gsname, const char *fsname,  const char *csname);
 
 protected:
 	GLuint vs;
+	GLuint tcs;
+	GLuint tes;
 	GLuint gs;
 	GLuint fs;
+	GLuint cs;
 	GLuint program;
 	GLuint vao;
 
@@ -34,13 +38,6 @@ protected:
 	char *fsname;
 };
 
-class c_underwater_sprog : public c_shader_prog {
-public:
-	c_underwater_sprog();
-	~c_underwater_sprog();
-
-	virtual bool init();
-};
 bool check_gl(const char *place);
 void set_cube_vertices(const float length, float *buf);
 

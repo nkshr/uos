@@ -68,37 +68,15 @@ void c_draw_comp::calc_prim_normals() {
 	}
 }
 
-c_underwater_comp::c_underwater_comp(){
-	strcpy(vsname, "underwater.vs");
-	strcpy(fsname, "underwater.fs");
-}
-
-bool c_underwater_comp::init() {
-	if (!sprog.create_shader(vsname, GL_VERTEX_SHADER))
-		return false;
-	if (!sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
-		return false;
-
-	if (!sprog.create_prog())
-		return false;
-
+bool c_underwater_comp::get_attrib_locs() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	loc_col = sprog.get_attrib_loc("col");
 	loc_normal = sprog.get_attrib_loc("normal_model");
 	loc_atten_coef = sprog.get_attrib_loc("atten_coef");
-
-	sprog.use();
-	poss = new float[num_vertices * 3];
-	cols = new float[num_vertices * 3];
-	normals = new float[num_vertices * 3];
-	atten_coefs = new float[num_vertices];
-	absorp_coefs = new float[num_vertices];
-
-	return check_gl("c_underwater_comp::init");
+	return check_gl("c_underwater_comp::get_attrib_locs");
 }
 
-void c_underwater_comp::draw() {
-	sprog.use();
+bool c_underwater_comp::set_uniforms() {
 	sprog.set_mat4("model", model.data());
 	sprog.set_mat4("view", view.data());
 	sprog.set_mat4("proj", proj.data());
@@ -111,9 +89,54 @@ void c_underwater_comp::draw() {
 	sprog.set_val("bdiffuse", light.bdiffuse);
 	sprog.set_val("bspec", light.bspec);
 	sprog.set_val("batten", light.batten);
+	return check_gl("c_underwater_comp::set_uniforms");
 }
 
+bool c_draw_comp::init() {
+	if (!sprog.init(vsname, tcsname, tesname, gsname, fsname, csname))
+		return false;
+	if (!get_attrib_locs())
+		return false;
+	gen_buffers();
+	if (!set_buffers())
+		return false;
+	return true;
+}
+
+c_draw_comp::~c_draw_comp() {
+	delete vsname;
+	delete tcsname;
+	delete tesname;
+	delete gsname;
+	delete fsname;
+	delete csname;
+
+	glDeleteBuffers(1, &vbuf_id);
+	glDeleteBuffers(1, &cbuf_id);
+	glDeleteBuffers(1, &ibuf_id);
+
+	delete poss;
+	delete cols;
+	delete normals;
+	delete prim_normals;
+}
+
+c_underwater_comp::c_underwater_comp(){
+	vsname = new char[1024];
+	fsname = new char[1024];
+
+	strcpy(vsname, "underwater.vs");
+	strcpy(fsname, "underwater.fs");
+
+	tcsname = NULL;
+	tesname = NULL;
+	gsname = NULL;
+	csname = NULL;
+}
+
+
 c_underwater_comp::~c_underwater_comp() {
+	delete absorp_coefs;
 }
 
 c_underwater_cube::c_underwater_cube():c_underwater_comp()
@@ -123,26 +146,9 @@ c_underwater_cube::c_underwater_cube():c_underwater_comp()
 	num_prims = num_vertices / num_prim_vertices;
 }
 
-bool c_underwater_cube::init() {
-	if (!c_underwater_comp::init())
-		return false;
-
-	num_vertices = NUM_CUBE_VERTICES;
-	num_prims = NUM_CUBE_VERTICES / 3;
-	poss = new  float[num_vertices * 3];
+void c_underwater_cube::gen_buffers() {
+	poss = new float[num_vertices * 3];
 	set_cube_vertices(CUBE_LEN, poss);
-
-	glGenBuffers(1, &vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		poss, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_pos);
-	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	indices = new int[num_vertices];
-	for (int i = 0; i < num_vertices; ++i) {
-		indices[i] = i;
-	}
 
 	cols = new float[num_vertices * 3];
 	set_vec3(1.f, 0.f, 0.f, cols);
@@ -170,12 +176,10 @@ bool c_underwater_cube::init() {
 		set_vec3(0.f, 1.f, 1.f, NULL);
 	}
 
-	glGenBuffers(1, &cbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		cols, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_col);
-	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	indices = new int[num_vertices];
+	for (int i = 0; i < num_vertices; ++i) {
+		indices[i] = i;
+	}
 
 	prim_normals = new float[num_prims * 3];
 	calc_prim_normals();
@@ -192,13 +196,8 @@ bool c_underwater_cube::init() {
 		}
 	}
 
-	glGenBuffers(1, &nbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, nbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		normals, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_normal);
-	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+	atten_coefs = new float[num_vertices];
+	absorp_coefs = new float[num_vertices];
 	for (int i = 0; i < num_vertices; ++i) {
 		float h, s, v;
 		int j = i * 3;
@@ -208,59 +207,89 @@ bool c_underwater_cube::init() {
 		//cout << h << ", " << absorp_coefs[i] << endl;
 		//absorp_coefs[i] = 1.f;
 	}
+}
+
+bool c_underwater_cube::set_buffers() {
+	
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_pos);
+	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glGenBuffers(1, &cbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		cols, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_col);
+	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glGenBuffers(1, &nbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, nbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		normals, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_normal);
+	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glGenBuffers(1, &abuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, abuf_id);
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * num_vertices,
 		absorp_coefs, GL_STATIC_DRAW);
-
 	glEnableVertexAttribArray(loc_atten_coef);
 	glVertexAttribPointer(loc_atten_coef, 1, GL_FLOAT, GL_FALSE, 0, 0);
-	return check_gl("c_underwater_cube::init");
+	return check_gl("c_underwater_cube::init_buffers");
 }
 
 void c_underwater_cube::draw() {
-	c_underwater_comp::draw();
+	sprog.use();
+	set_uniforms();
 	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-}
-
-void c_underwater_cube::destroy() {
-	glDeleteBuffers(1, &vbuf_id);
-	glDeleteBuffers(1, &cbuf_id);
-	glDeleteBuffers(1, &ibuf_id);
-	delete poss;
-	delete cols;
-	delete normals;
-	delete prim_normals;
-}
-
-c_underwater_cube::~c_underwater_cube() {
-	destroy();
 }
 
 c_light_cube::c_light_cube() {
 	prim_type = GL_TRIANGLES;
+	vsname = new char[1024];
+	fsname = new char[1024];
+
 	strcpy(vsname, "light_cube.vs");
 	strcpy(fsname, "light_cube.fs");
-}
 
-bool c_light_cube::init() {
-	if (!sprog.create_shader(vsname, GL_VERTEX_SHADER))
-		return false;
-	if (!sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
-		return false;
-
-	if (!sprog.create_prog())
-		return false;
-
-	loc_pos = sprog.get_attrib_loc("pos_model");
-	sprog.use();
+	tcsname = NULL;
+	tesname = NULL;
+	gsname = NULL;
+	csname = NULL;
 
 	num_vertices = NUM_CUBE_VERTICES;
 	num_prims = NUM_CUBE_VERTICES / 3;
+}
+
+bool c_light_cube::set_uniforms() {
+	sprog.set_vec3("light_col", light.col(0), light.col(1), light.col(2));
+	sprog.set_val("light_pwr", light.pwr);
+
+	Matrix4f light_model;
+	light_model << 1.f, 0.f, 0.f, light.pos(0),
+		0.f, 1.f, 0.f, light.pos(1),
+		0.f, 0.f, 1.f, light.pos(2),
+		0.f, 0.f, 0.f, 1.f;
+
+	Matrix4f mvp = proj * view * light_model;
+	sprog.set_mat4("mvp", mvp.data());
+	return check_gl("c_light_cube::set_uniforms");
+}
+
+bool c_light_cube::get_attrib_locs() {
+	loc_pos = sprog.get_attrib_loc("pos_model");
+	return true;
+}
+
+void c_light_cube::gen_buffers() {
 	poss = new float[num_vertices * 3];
 	set_cube_vertices(LIGHT_CUBE_LEN, poss);
+}
+
+bool c_light_cube::set_buffers() {
 
 	glGenBuffers(1, &vbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
@@ -274,127 +303,48 @@ bool c_light_cube::init() {
 
 void c_light_cube::draw() {
 	sprog.use();
-	sprog.set_vec3("light_col", light.col(0), light.col(1), light.col(2));
-	sprog.set_val("light_pwr", light.pwr);
-
-	Matrix4f light_model;
-	light_model << 1.f, 0.f, 0.f, light.pos(0),
-		0.f, 1.f, 0.f, light.pos(1),
-		0.f, 0.f, 1.f, light.pos(2),
-		0.f, 0.f, 0.f, 1.f;
-
-	Matrix4f mvp = proj * view * light_model;
-	sprog.set_mat4("mvp", mvp.data());
-	if (prim_type == GL_LINES)
-		glDrawArrays(GL_LINE_STRIP, 0, num_vertices);
-	else
-		glDrawArrays(GL_TRIANGLES, 0, num_vertices);
-}
-
-void c_light_cube::destroy() {
-	glDeleteBuffers(1, &vbuf_id);
-	glDeleteBuffers(1, &cbuf_id);
-	glDeleteBuffers(1, &ibuf_id);
-	delete poss;
+	set_uniforms();
+	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 }
 
 c_light_cube::~c_light_cube() {
-	destroy();
 }
 
-c_wire_cube::c_wire_cube() {
-	strcpy(vsname, "line.vs");
-	strcpy(gsname, "line.gs");
-	strcpy(fsname, "line.fs");
-}
 
-bool c_wire_cube::init() {
-	if (!sprog.create_shader(vsname, GL_VERTEX_SHADER))
-		return false;
-	if (!sprog.create_shader(gsname, GL_GEOMETRY_SHADER))
-		return false;
-	if (!sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
-		return false;
-
-	if (!sprog.create_prog())
-		return false;
-
-	sprog.use();
-	loc_pos = sprog.get_attrib_loc("pos_model");
-	loc_col = sprog.get_attrib_loc("col");
-
-	num_vertices = NUM_CUBE_VERTICES;
-	num_prims = NUM_CUBE_VERTICES / 3;
-	poss = new  float[num_vertices * 3];
-	set_cube_vertices(CUBE_LEN, poss);
-
-	glGenBuffers(1, &vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		poss, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_pos);
-	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	cols = new float[num_vertices * 3];
-	for (int i = 0; i < num_vertices * 3; ++i)
-		cols[i] = 1.f;
-	glGenBuffers(1, &cbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		cols, GL_STATIC_DRAW);
-	
-	glEnableVertexAttribArray(loc_col);
-	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	return check_gl("c_wire_cube::init");
-}
-
-void c_wire_cube::draw() {
-	sprog.use();
-	Matrix4f mvp = proj * view * model;
-	sprog.set_mat4("mvp", mvp.data());
-	//glDrawElements(GL_LINE_STRIP, 36, GL_UNSIGNED_INT, 0);
-	glDrawArrays(GL_LINE_STRIP, 0, num_vertices);
-}
-
-void c_wire_cube::destroy() {
-	glDeleteBuffers(1, &vbuf_id);
-	glDeleteBuffers(1, &cbuf_id);
-	glDeleteBuffers(1, &ibuf_id);
-	delete poss;
-	delete cols;
-}
-
-c_wire_cube::~c_wire_cube() {
-	destroy();
-}
 
 c_wire_plane::c_wire_plane() {
+	vsname = new char[1024];
+	gsname = new char[1024];
+	fsname = new char[1024];
+
 	strcpy(vsname, "line.vs");
 	strcpy(gsname, "line.gs");
 	strcpy(fsname, "line.fs");
+
+	tcsname = NULL;
+	tesname = NULL;
+	csname = NULL;
 }
 
-bool c_wire_plane::init() {
-	if (!sprog.create_shader(vsname, GL_VERTEX_SHADER))
-		return false;
-	if (!sprog.create_shader(gsname, GL_GEOMETRY_SHADER))
-		return false;
-	if (!sprog.create_shader(fsname, GL_FRAGMENT_SHADER))
-		return false;
+bool c_wire_plane::set_uniforms() {
+	Matrix4f mvp = proj * view;
+	sprog.set_mat4("mvp", mvp.data());
+	return check_gl("c_wire_plane::set_uniforms");
+}
 
-	if (!sprog.create_prog())
-		return false;
-
+bool c_wire_plane::get_attrib_locs() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	loc_col = sprog.get_attrib_loc("col");
-	sprog.use();
+	return true;
+}
 
+void c_wire_plane::gen_buffers() {
 	const float half_len = PLANE_LEN * 0.5f;
 	const float cell_len = PLANE_CELL_LEN;
 	num_vertices = 4 * static_cast<int>(PLANE_LEN / PLANE_CELL_LEN);
 	num_prims = num_vertices / 2;
 	poss = new float[num_vertices * 3];
-	for (int i = 0; i < num_vertices/2; ++i) {
+	for (int i = 0; i < num_vertices / 2; ++i) {
 		const int j = i * 3;
 		const int k = i / 2;
 		if (i % 2 == 0) {
@@ -424,17 +374,19 @@ bool c_wire_plane::init() {
 		}
 	}
 
+	cols = new float[num_vertices * 3];
+	for (int i = 0; i < num_vertices * 3; ++i) {
+		cols[i] = 1.f;
+	}
+}
+
+bool c_wire_plane::set_buffers() {
 	glGenBuffers(1, &vbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
 		poss, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_pos);
 	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	cols = new float[num_vertices * 3];
-	for (int i = 0; i < num_vertices * 3; ++i) {
-		cols[i] = 1.f;
-	}
 
 	glGenBuffers(1, &cbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
@@ -448,20 +400,11 @@ bool c_wire_plane::init() {
 
 void c_wire_plane::draw() {
 	sprog.use();
-	Matrix4f mvp = proj * view;
-	sprog.set_mat4("mvp", mvp.data());
+	set_uniforms();
 	glDrawArrays(GL_LINES, 0, num_vertices);
 }
 
-void c_wire_plane::destroy() {
-	glDeleteBuffers(1, &vbuf_id);
-	glDeleteBuffers(1, &cbuf_id);
-	delete poss;
-	delete cols;
-};
-
 c_wire_plane::~c_wire_plane() {
-	destroy();
 }
 
 c_underwater_grids::c_underwater_grids():c_underwater_comp() {
@@ -471,13 +414,13 @@ c_underwater_grids::c_underwater_grids():c_underwater_comp() {
 	num_vertices = NUM_QUAD_VERTICES * num_prims;
 }
 
-bool c_underwater_grids::init() {
-	if (!c_underwater_comp::init())
-		return false;
-
+void c_underwater_grids::gen_buffers() {
 	const int offsetx = num_grids_along_x >> 1;
 	const int offsety = num_grids_along_y >> 1;
 	const float hstep = 360.f / num_prims;
+	poss = new float[num_vertices * 3];
+	normals = new float[num_vertices * 3];
+	cols = new float[num_vertices * 3];
 	for (int x = 0; x < num_grids_along_x; ++x) {
 		for (int y = 0; y < num_grids_along_y; ++y) {
 			const int iposs = (x + y * num_grids_along_x) * 12;
@@ -521,20 +464,8 @@ bool c_underwater_grids::init() {
 		}
 	}
 
-	glGenBuffers(1, &vbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		poss, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_pos);
-	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &nbuf_id);
-	glBindBuffer(GL_ARRAY_BUFFER, nbuf_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
-		normals, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(loc_normal);
-	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+	atten_coefs = new float[num_vertices];
+	absorp_coefs = new float[num_vertices];
 	for (int i = 0; i < num_vertices; ++i) {
 		int j = i * 3;
 		absorp_coefs[i] = calc_absorp_coef(cols[j]);
@@ -542,42 +473,50 @@ bool c_underwater_grids::init() {
 		const float s = cols[j + 1];
 		const float v = cols[j + 2];
 
-		convert_hsv_to_rgb(h, s, v, cols[j], cols[j+1] , cols[j+2]);
+		convert_hsv_to_rgb(h, s, v, cols[j], cols[j + 1], cols[j + 2]);
 		atten_coefs[i] = absorp_coefs[i];
 		//cout << atten_coefs[i] << " : "  << cols[j] 
 		//	<< ", " << cols[j + 1] << ", " << cols[j + 2] << endl;
 	}
+}
 
+bool c_underwater_grids::set_buffers() {	
+	glGenBuffers(1, &vbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		poss, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_pos);
+	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glGenBuffers(1, &nbuf_id);
+	glBindBuffer(GL_ARRAY_BUFFER, nbuf_id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+		normals, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(loc_normal);
+	glVertexAttribPointer(loc_normal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		
 	glGenBuffers(1, &cbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
 		cols, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_col);
 	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+	
 	glGenBuffers(1, &abuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, abuf_id);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * num_vertices,
 		atten_coefs, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(loc_atten_coef);
 	glVertexAttribPointer(loc_atten_coef, 1, GL_FLOAT, GL_FALSE, 0, 0);
-	return check_gl("c_underwater_grids::init");
+	return check_gl("c_underwater_grids::init_buffers");
 }
 
 void c_underwater_grids::draw() {
-	c_underwater_comp::draw();
+	sprog.use();
+	set_uniforms();
 	glDrawArrays(GL_QUADS, 0, num_vertices);
 }
 
-void c_underwater_grids::destroy() {
-	glDeleteBuffers(1, &vbuf_id);
-	glDeleteBuffers(1, &cbuf_id);
-	glDeleteBuffers(1, &ibuf_id);
-	delete poss;
-	delete cols;
-	delete normals;
-}
-
 c_underwater_grids::~c_underwater_grids() {
-
+	
 }

@@ -46,10 +46,16 @@ bool c_shader_prog::create_prog() {
 
 	if(vs)
 		glAttachShader(program, vs);
+	if (tcs)
+		glAttachShader(program, tcs);
+	if (tes)
+		glAttachShader(program, tes);
 	if(gs)
 		glAttachShader(program, gs);
 	if(fs)
 		glAttachShader(program, fs);
+	if (cs)
+		glAttachShader(program, cs);
 	
 	glLinkProgram(program);
 
@@ -151,31 +157,45 @@ bool c_shader_prog::create_shader(const char * fname, GLenum stype) {
 	case GL_VERTEX_SHADER:
 		vs = shader;
 		break;
+	case GL_TESS_CONTROL_SHADER:
+		tcs = shader;
+		break;
+	case GL_TESS_EVALUATION_SHADER:
+		tes = shader;
+		break;
 	case GL_GEOMETRY_SHADER:
 		gs = shader;
 		break;
 	case GL_FRAGMENT_SHADER:
 		fs = shader;
 		break;
+	case GL_COMPUTE_SHADER:
+		cs = shader;
+		break;
 	}
 	return static_cast<bool>(shader);
 }
 
-c_underwater_sprog::c_underwater_sprog() {
-	strcpy(vsname, "underwater.vs");
-	strcpy(fsname, "underwater.fs");
-}
+bool c_shader_prog::init(const char *vsname, const char *tcsname, const char *tesname,
+	const char *gsname, const char *fsname,  const char *csname) {
+	if (vsname && !create_shader(vsname, GL_VERTEX_SHADER))
+		return false;
+	if (tcsname && !create_shader(tcsname, GL_TESS_CONTROL_SHADER))
+		return false;
+	if (tesname && !create_shader(tesname, GL_TESS_EVALUATION_SHADER))
+		return false;
+	if (gsname && !create_shader(gsname, GL_GEOMETRY_SHADER))
+		return false;
+	if (fsname && !create_shader(fsname, GL_FRAGMENT_SHADER))
+		return false;
+	if (csname && !create_shader(csname, GL_COMPUTE_SHADER))
+		return false;
 
-c_underwater_sprog::~c_underwater_sprog() {
-}
+	if (!create_prog())
+		return false;
 
-bool c_underwater_sprog::init() {
-	loc_pos = get_attrib_loc("pos_model");
-	loc_col = get_attrib_loc("col");
-	loc_normal = get_attrib_loc("normal_model");
-	loc_atten_coef = get_attrib_loc("atten_coef");
-
-	return check_gl("c_underwater_sprog::init");
+	use();
+	return true;
 }
 
 bool check_gl(const char *place) {
