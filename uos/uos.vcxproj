@@ -122,15 +122,19 @@
   <ItemGroup>
     <ClCompile Include="drawing_component.cpp" />
     <ClCompile Include="math.cpp" />
+    <ClCompile Include="uos.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawing_component.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="uos.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="path_tracer.fs" />
+    <None Include="path_tracer.vs" />
     <None Include="underwater.fs" />
     <None Include="underwater.vs" />
     <None Include="light_cube.fs" />

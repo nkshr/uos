@@ -316,22 +316,25 @@ int main(int argc, char ** argv) {
 	glCullFace(GL_BACK);
 
 	//initialization
-	c_underwater_cube cube;
-	if (!cube.init())
-		return false;
+	//c_underwater_cube cube;
+	//if (!cube.init())
+	//	return false;
 
-	c_light_cube light_cube;
-	if (!light_cube.init())
-		return false;
+	//c_light_cube light_cube;
+	//if (!light_cube.init())
+	//	return false;
 
-	c_wire_plane wire_plane;
-	if (!wire_plane.init())
-		return false;
+	//c_wire_plane wire_plane;
+	//if (!wire_plane.init())
+	//	return false;
 
-	c_underwater_grids grids;
-	if (!grids.init())
-		return false;
+	//c_underwater_grids grids;
+	//if (!grids.init())
+	//	return false;
 
+	//c_path_tracer path_tracer;
+	//if (!path_tracer.init())
+	//	return false;
 
 	light.pos = Vector3f(1.f, 1.f, 1.f);
 	light.col = Vector3f(1.f, 1.f, 1.f);
@@ -371,34 +374,35 @@ int main(int argc, char ** argv) {
 		c_draw_comp::set_light(light);
 		c_draw_comp::set_view(obsv.view);
 
-		Matrix4f cube_model;
-		get_Sim3(0.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
-		cube.set_model(cube_model);
+		//Matrix4f cube_model;
+		//get_Sim3(0.f, deg_to_rad(ang), deg_to_rad(0), 0.f, 0.f, 0.f, 0.f, cube_model);
+		//cube.set_model(cube_model);
 
-		Matrix4f grids_model;
-		get_Sim3(-0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, grids_model);
-		grids.set_model(grids_model);
+		//Matrix4f grids_model;
+		//get_Sim3(-0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, grids_model);
+		//grids.set_model(grids_model);
 
 		mtx.unlock();
 
-		ang += 1.f;
-		
-		if (ang > 360) {
-			ang = 0.f;
-		}
-		
-		if(bdraw_cube)
-			cube.draw();
+		//ang += 1.f;
+		//
+		//if (ang > 360) {
+		//	ang = 0.f;
+		//}
+		//
+		//if(bdraw_cube)
+		//	cube.draw();
 
-		if (bdraw_light_cube)
-			light_cube.draw();
+		//if (bdraw_light_cube)
+		//	light_cube.draw();
 
-		if (bdraw_wire_plane)
-			wire_plane.draw();
+		//if (bdraw_wire_plane)
+		//	wire_plane.draw();
 
-		if (bdraw_grids)
-			grids.draw();
+		//if (bdraw_grids)
+		//	grids.draw();
 
+		//path_tracer.draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		Sleep(100);

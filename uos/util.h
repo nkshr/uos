@@ -14,9 +14,17 @@ public:
 	void set_vec3(const char *param, const float a, const float b, const float c);
 	void set_val(const char *param, const float val);
 	void set_mat4(const char *param, const float *data);
+	void set_vsname(const char *sname);
+	void set_tcsname(const char *sname);
+	void set_tesname(const char *sname);
+	void set_gsname(const char *sname);
+	void set_fsname(const char *sname);
+	void set_csname(const char *sname);
+	void set_tfvaryings(const int num_tfvaryings, const char **tfvarings);
 
 	bool init(const char *vsname, const char *tcsname, const char *tesname,
 		const char *gsname, const char *fsname,  const char *csname);
+	bool init();
 
 protected:
 	GLuint vs;
@@ -28,14 +36,15 @@ protected:
 	GLuint program;
 	GLuint vao;
 
-	GLint loc_pos;
-	GLint loc_col;
-	GLint loc_st;
-	GLint loc_normal;
-	GLint loc_atten_coef;
-	char *vsname;
-	char *gsname;
-	char *fsname;
+	char vsname[1024];
+	char tcsname[1024];
+	char tesname[1024];
+	char gsname[1024];
+	char fsname[1024];
+	char csname[1024];
+	char **tfvaryings;
+
+	int num_tfvaryings;
 };
 
 bool check_gl(const char *place);

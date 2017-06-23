@@ -27,6 +27,9 @@
     <ClCompile Include="drawing_component.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="uos.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.h">
@@ -36,6 +39,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="drawing_component.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="uos.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,6 +65,12 @@
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="underwater.fs">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="path_tracer.vs">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="path_tracer.fs">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>

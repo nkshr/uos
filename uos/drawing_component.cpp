@@ -210,7 +210,6 @@ void c_underwater_cube::gen_buffers() {
 }
 
 bool c_underwater_cube::set_buffers() {
-	
 	glGenBuffers(1, &vbuf_id);
 	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
@@ -281,7 +280,7 @@ bool c_light_cube::set_uniforms() {
 
 bool c_light_cube::get_attrib_locs() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
-	return true;
+	return check_gl("c_light_cube::get_attrib_locs");
 }
 
 void c_light_cube::gen_buffers() {
@@ -335,7 +334,7 @@ bool c_wire_plane::set_uniforms() {
 bool c_wire_plane::get_attrib_locs() {
 	loc_pos = sprog.get_attrib_loc("pos_model");
 	loc_col = sprog.get_attrib_loc("col");
-	return true;
+	return check_gl("c_wire_plane::get_attrib_locs");
 }
 
 void c_wire_plane::gen_buffers() {
@@ -520,3 +519,110 @@ void c_underwater_grids::draw() {
 c_underwater_grids::~c_underwater_grids() {
 	
 }
+
+//bool c_path_tracer::set_uniforms() {
+//	return check_gl("c_path_tracer::set_uniforms");
+//}
+//
+//bool c_path_tracer::get_attrib_locs() {
+//	loc_pos = sprog.get_attrib_loc("pos");
+//	loc_col = sprog.get_attrib_loc("col");
+//	//loc_normal = sprog.get_attrib_loc("normal_model");
+//	return check_gl("c_path_tracer::get_attrib_locs");
+//}
+//
+//void c_path_tracer::gen_buffers() {
+//	poss = new float[num_vertices * 3];
+//	cols = new float[num_vertices * 3];
+//	normals = new float[num_vertices * 3];
+//}
+//
+//bool c_path_tracer::set_buffers() {
+//	//glGenTransformFeedbacks(1, &tfbuf_id);
+//	//glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfbuf_id);
+//	poss[0] = -0.5f;
+//	poss[1] = -0.5f;
+//	poss[2] = 1.f;
+//
+//	poss[3] = 0.f;
+//	poss[4] = 0.5f;
+//	poss[5] = 1.f;
+//
+//	poss[6] = 0.5f;
+//	poss[7] = -0.5f;
+//	poss[8] = 1.f;
+//
+//	glGenBuffers(1, &vbuf_id);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbuf_id);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+//		poss, GL_STATIC_DRAW);
+//	glEnableVertexAttribArray(loc_pos);
+//	glVertexAttribPointer(loc_pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	memset((void*)cols, 1, sizeof(float) * 3 * num_vertices);
+//	glGenBuffers(1, &cbuf_id);
+//	glBindBuffer(GL_ARRAY_BUFFER, cbuf_id);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices,
+//		cols, GL_STATIC_DRAW);
+//	glEnableVertexAttribArray(loc_col);
+//	glVertexAttribPointer(loc_col, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	glGenBuffers(1, &tfbuf_id);
+//	glBindBuffer(GL_ARRAY_BUFFER, tfbuf_id);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * num_vertices * 2,
+//		nullptr, GL_STATIC_READ);
+//	//glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tfbuf_id);
+//	return check_gl("c_path_tracer::set_buffers");
+//}
+//
+//c_path_tracer::c_path_tracer() {
+//	sprog.set_vsname("path_tracer.vs");
+//	sprog.set_fsname("path_tracer.fs");	
+//	sprog.set_tfvaryings(2, tfvaryings);
+//	num_prim_vertices = NUM_TRI_VERTICES;
+//	num_prims = 1;
+//	num_vertices = num_prims * num_prim_vertices;
+//}
+//
+//bool c_path_tracer::init() {
+//	if (!sprog.init())
+//		return false;
+//	if (!get_attrib_locs())
+//		return false;
+//	gen_buffers();
+//	if (!set_buffers())
+//		return false;
+//	return true;
+//}
+//const char* c_path_tracer::tfvaryings[] = { "vertex_pos", "vertex_col"};
+//
+//void c_path_tracer::draw() {
+//	glEnable(GL_RASTERIZER_DISCARD);
+//	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tfbuf_id);
+//
+//	check_gl("c_path_tracer::draw");
+//
+//	glBeginTransformFeedback(GL_TRIANGLES);
+//	check_gl("c_path_tracer::draw");
+//
+//	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+//	check_gl("c_path_tracer::draw");
+//
+//	glEndTransformFeedback();
+//	glFlush();
+//	float feedback[18];
+//	memset((void*)feedback, 0, sizeof(feedback));
+//	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
+//	check_gl("c_path_tracer::draw");
+//
+//	for (int i = 0; i < num_vertices * 2; ++i) {
+//		int j = i * 3;
+//		printf("%f %f %f\n", feedback[j], feedback[j + 1], feedback[j + 2]);
+//	}
+//	glDisable(GL_RASTERIZER_DISCARD);
+//	check_gl("c_path_tracer::draw");
+//}
+//
+//c_path_tracer::~c_path_tracer() {
+//
+//}

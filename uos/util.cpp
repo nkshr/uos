@@ -35,7 +35,8 @@ char * load_text(const char *fname) {
 	return txt;
 }
 
-c_shader_prog::c_shader_prog() :vs(0), gs(0), fs(0){
+c_shader_prog::c_shader_prog() :vs(0), tcs(0), tes(0), gs(0), fs(0), cs(0), num_tfvaryings(0){
+	vsname[0] = tcsname[0] = tesname[0] = gsname[0] = fsname[0] = csname[0] = '\0';
 }
 
 bool c_shader_prog::create_prog() {
@@ -56,7 +57,10 @@ bool c_shader_prog::create_prog() {
 		glAttachShader(program, fs);
 	if (cs)
 		glAttachShader(program, cs);
-	
+
+	if (num_tfvaryings)
+		glTransformFeedbackVaryings(program, num_tfvaryings, tfvaryings, GL_INTERLEAVED_ATTRIBS);
+
 	glLinkProgram(program);
 
 	int link_stat;
@@ -115,6 +119,36 @@ void c_shader_prog::set_val(const char *param, const float val) {
 void c_shader_prog::set_mat4(const char *param, const float *data) {
 	GLuint loc = glGetUniformLocation(program, param);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, data);
+}
+
+void c_shader_prog::set_vsname(const char *shader) {
+	strcpy(vsname, shader);
+}
+
+void c_shader_prog::set_tcsname(const char *shader) {
+	strcpy(tcsname, shader);
+}
+
+void c_shader_prog::set_tesname(const char *shader) {
+	strcpy(tesname, shader);
+}
+void c_shader_prog::set_gsname(const char *shader) {
+	strcpy(gsname, shader);
+}
+void c_shader_prog::set_fsname(const char *shader) {
+	strcpy(fsname, shader);
+}
+void c_shader_prog::set_csname(const char *shader) {
+	strcpy(csname, shader);
+}
+
+void c_shader_prog::set_tfvaryings(const int num_tfvaryings, const char **tfvaryings) {
+	this->num_tfvaryings = num_tfvaryings;
+	this->tfvaryings = new char*[num_tfvaryings];
+	for (int i = 0; i < num_tfvaryings; ++i) {
+		this->tfvaryings[i] = new char[strlen(tfvaryings[i])+1];
+		strcpy(this->tfvaryings[i], tfvaryings[i]);
+	}
 }
 
 void c_shader_prog::use() {
@@ -189,6 +223,27 @@ bool c_shader_prog::init(const char *vsname, const char *tcsname, const char *te
 	if (fsname && !create_shader(fsname, GL_FRAGMENT_SHADER))
 		return false;
 	if (csname && !create_shader(csname, GL_COMPUTE_SHADER))
+		return false;
+
+	if (!create_prog())
+		return false;
+
+	use();
+	return true;
+}
+
+bool c_shader_prog::init() {
+	if (vsname[0] != '\0' && !create_shader(vsname, GL_VERTEX_SHADER))
+		return false;
+	if (tcsname[0] != '\0' && !create_shader(tcsname, GL_TESS_CONTROL_SHADER))
+		return false;
+	if (tesname[0] != '\0' && !create_shader(tesname, GL_TESS_EVALUATION_SHADER))
+		return false;
+	if (gsname[0] != '\0' && !create_shader(gsname, GL_GEOMETRY_SHADER))
+		return false;
+	if (fsname[0] != '\0' && !create_shader(fsname, GL_FRAGMENT_SHADER))
+		return false;
+	if (csname[0] != '\0' && !create_shader(csname, GL_COMPUTE_SHADER))
 		return false;
 
 	if (!create_prog())

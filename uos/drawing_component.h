@@ -24,6 +24,7 @@ protected:
 	GLuint cbuf_id;
 	GLuint ibuf_id;
 	GLuint nbuf_id;
+	GLuint tfbuf_id;
 
 	c_shader_prog sprog;
 
@@ -45,7 +46,7 @@ protected:
 	virtual void gen_buffers() = 0;
 
 public:
-	bool init();
+	virtual bool init();
 	virtual void draw() = 0;
 
 	static void set_view(const Matrix4f &view);
@@ -123,3 +124,18 @@ public:
 	virtual void draw();
 	~c_underwater_grids();
 };
+
+
+//class c_path_tracer : public c_draw_comp {
+//protected:
+//	virtual bool set_uniforms();
+//	virtual bool get_attrib_locs();
+//	virtual void gen_buffers();
+//	virtual bool set_buffers();
+//	static const char *tfvaryings[];
+//public:
+//	c_path_tracer();
+//	virtual bool init();
+//	virtual void draw();
+//	~c_path_tracer();
+//};
