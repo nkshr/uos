@@ -19,6 +19,7 @@ struct s_ray {
 };
 
 struct s_prim {
+	Vector3f col;
 	Vector3f emittance;
 	Vector3f reflectance;;
 	Vector3f *v;
@@ -84,6 +85,47 @@ struct s_obj {
 			}
 		}
 	}	
+
+	float* gen_poss() {
+		float *ret = new float[prims.size * prims[0]->num_vertices * 3];
+		for (vector<s_prim*>::iterator it_prims = prims.begin();
+			it_prims != prims.end(); ++it_prims) {
+			for (int i = 0; i < (*it_prims)->num_vertices; ++i) {
+				*ret = (*it_prims)->v[i][0];
+				++ret;
+				*ret = (*it_prims)->v[i][1];
+				++ret;
+				*ret = (*it_prims)->v[i][2];
+				++ret;
+			}
+		}
+	}
+
+	float* gen_cols() {
+		float *ret = new float[prims.size * 3];
+		for (vector<s_prim*>::iterator it_prims = prims.begin();
+			it_prims != prims.end(); ++it_prims) {
+			*ret = (*it_prims)->col[0];
+			++ret;
+			*ret = (*it_prims)->col[1];
+			++ret;
+			*ret = (*it_prims)->col[2];
+			++ret;
+		}
+	}
+
+	float* gen_normals() {
+		float *ret = new float[prims.size * 3];
+		for (vector<s_prim*>::iterator it_prims = prims.begin();
+			it_prims != prims.end(); ++it_prims) {
+			*ret = (*it_prims)->normal[0];
+			++ret;
+			*ret = (*it_prims)->normal[1];
+			++ret;
+			*ret = (*it_prims)->normal[2];
+			++ret;
+		}
+	}
 };
 
 static vector<s_obj*> objs;
